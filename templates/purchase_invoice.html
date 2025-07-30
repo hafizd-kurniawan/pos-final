@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Invoice - {{.InvoiceNumber}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .company-info {
+            margin-top: 10px;
+            color: #666;
+        }
+        .invoice-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            color: #333;
+        }
+        .invoice-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .invoice-details, .supplier-details {
+            width: 48%;
+        }
+        .invoice-details h3, .supplier-details h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .vehicle-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .vehicle-details h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            color: #333;
+        }
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .pricing-table th, .pricing-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .pricing-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .pricing-table .amount {
+            text-align: right;
+        }
+        .total-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+        .final-total {
+            font-size: 16px;
+            font-weight: bold;
+            border-top: 2px solid #333;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .payment-info {
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 50px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature {
+            text-align: center;
+            width: 30%;
+        }
+        .signature-line {
+            border-bottom: 1px solid #333;
+            margin: 50px 0 10px 0;
+        }
+        .notes {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fffbf0;
+            border-left: 4px solid #ffa500;
+        }
+        .currency {
+            font-weight: bold;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">POS Vehicle System</div>
+        <div class="company-info">
+            Jl. Raya Otomotif No. 123, Jakarta<br>
+            Telp: (021) 1234-5678 | Email: info@posvehicle.com<br>
+            NPWP: 01.234.567.8-901.000
+        </div>
+    </div>
+
+    <div class="invoice-title">INVOICE PEMBELIAN</div>
+
+    <div class="invoice-info">
+        <div class="invoice-details">
+            <h3>Detail Invoice</h3>
+            <div class="details-row">
+                <span class="label">No. Invoice:</span>
+                <span class="value">{{.InvoiceNumber}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Tanggal:</span>
+                <span class="value">{{.TransactionDate.Format "02 January 2006"}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Dibuat oleh:</span>
+                <span class="value">{{.Creator.FullName}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Metode Bayar:</span>
+                <span class="value">{{if eq .PaymentMethod "cash"}}TUNAI{{else}}TRANSFER{{end}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Jenis Transaksi:</span>
+                <span class="value">{{if eq .TransactionType "customer"}}DARI CUSTOMER{{else}}DARI SUPPLIER{{end}}</span>
+            </div>
+        </div>
+
+        <div class="supplier-details">
+            <h3>{{if eq .TransactionType "customer"}}Detail Customer{{else}}Detail Supplier{{end}}</h3>
+            {{if .Customer}}
+            <div class="details-row">
+                <span class="label">Nama:</span>
+                <span class="value">{{.Customer.Name}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Kode:</span>
+                <span class="value">{{.Customer.CustomerCode}}</span>
+            </div>
+            {{if .Customer.Phone}}
+            <div class="details-row">
+                <span class="label">Telepon:</span>
+                <span class="value">{{.Customer.Phone}}</span>
+            </div>
+            {{end}}
+            {{if .Customer.Email}}
+            <div class="details-row">
+                <span class="label">Email:</span>
+                <span class="value">{{.Customer.Email}}</span>
+            </div>
+            {{end}}
+            {{end}}
+            {{if .Supplier}}
+            <div class="details-row">
+                <span class="label">Nama:</span>
+                <span class="value">{{.Supplier.Name}}</span>
+            </div>
+            <div class="details-row">
+                <span class="label">Kode:</span>
+                <span class="value">{{.Supplier.SupplierCode}}</span>
+            </div>
+            {{if .Supplier.ContactPerson}}
+            <div class="details-row">
+                <span class="label">Contact Person:</span>
+                <span class="value">{{.Supplier.ContactPerson}}</span>
+            </div>
+            {{end}}
+            {{if .Supplier.Phone}}
+            <div class="details-row">
+                <span class="label">Telepon:</span>
+                <span class="value">{{.Supplier.Phone}}</span>
+            </div>
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+
+    <div class="vehicle-details">
+        <h3>Detail Kendaraan yang Dibeli</h3>
+        <div class="details-row">
+            <span class="label">Kode Kendaraan:</span>
+            <span class="value">{{.Vehicle.VehicleCode}}</span>
+        </div>
+        <div class="details-row">
+            <span class="label">Merk/Model:</span>
+            <span class="value">{{.Vehicle.Brand}} {{.Vehicle.Model}} ({{.Vehicle.Year}})</span>
+        </div>
+        {{if .Vehicle.PlateNumber}}
+        <div class="details-row">
+            <span class="label">No. Polisi:</span>
+            <span class="value">{{.Vehicle.PlateNumber}}</span>
+        </div>
+        {{end}}
+        {{if .Vehicle.ChassisNumber}}
+        <div class="details-row">
+            <span class="label">No. Rangka:</span>
+            <span class="value">{{.Vehicle.ChassisNumber}}</span>
+        </div>
+        {{end}}
+        {{if .Vehicle.EngineNumber}}
+        <div class="details-row">
+            <span class="label">No. Mesin:</span>
+            <span class="value">{{.Vehicle.EngineNumber}}</span>
+        </div>
+        {{end}}
+        {{if .Vehicle.Color}}
+        <div class="details-row">
+            <span class="label">Warna:</span>
+            <span class="value">{{.Vehicle.Color}}</span>
+        </div>
+        {{end}}
+    </div>
+
+    <table class="pricing-table">
+        <thead>
+            <tr>
+                <th>Deskripsi</th>
+                <th>Qty</th>
+                <th class="amount">Harga Awal</th>
+                <th class="amount">Harga Negosiasi</th>
+                <th class="amount">Harga Final</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{.Vehicle.Brand}} {{.Vehicle.Model}} ({{.Vehicle.Year}})</td>
+                <td>1</td>
+                <td class="amount currency">Rp {{printf "%.0f" .PurchasePrice | printf "%s" | printf "%s" | printf "%s"}}</td>
+                <td class="amount currency">
+                    {{if .NegotiatedPrice}}
+                        Rp {{printf "%.0f" .NegotiatedPrice | printf "%s" | printf "%s" | printf "%s"}}
+                    {{else}}
+                        -
+                    {{end}}
+                </td>
+                <td class="amount currency">Rp {{printf "%.0f" .FinalPrice | printf "%s" | printf "%s" | printf "%s"}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="total-section">
+        <div class="total-row">
+            <span class="label">Harga Awal:</span>
+            <span class="currency">Rp {{printf "%.0f" .PurchasePrice | printf "%s" | printf "%s" | printf "%s"}}</span>
+        </div>
+        {{if .NegotiatedPrice}}
+        <div class="total-row">
+            <span class="label">Harga Negosiasi:</span>
+            <span class="currency">Rp {{printf "%.0f" .NegotiatedPrice | printf "%s" | printf "%s" | printf "%s"}}</span>
+        </div>
+        {{end}}
+        <div class="total-row final-total">
+            <span class="label">TOTAL PEMBAYARAN:</span>
+            <span class="currency">Rp {{printf "%.0f" .FinalPrice | printf "%s" | printf "%s" | printf "%s"}}</span>
+        </div>
+    </div>
+
+    <div class="payment-info">
+        <h3>Informasi Pembayaran</h3>
+        <div class="details-row">
+            <span class="label">Metode Pembayaran:</span>
+            <span class="value">{{if eq .PaymentMethod "cash"}}TUNAI{{else}}TRANSFER BANK{{end}}</span>
+        </div>
+        {{if eq .PaymentMethod "transfer"}}
+        {{if .TransferProof}}
+        <div class="details-row">
+            <span class="label">Bukti Transfer:</span>
+            <span class="value">Terlampir</span>
+        </div>
+        {{end}}
+        {{end}}
+        <div class="details-row">
+            <span class="label">Status:</span>
+            <span class="value" style="color: green; font-weight: bold;">LUNAS</span>
+        </div>
+    </div>
+
+    {{if .Notes}}
+    <div class="notes">
+        <h3>Catatan:</h3>
+        <p>{{.Notes}}</p>
+    </div>
+    {{end}}
+
+    <div class="footer">
+        <div class="signature">
+            <div>{{if eq .TransactionType "customer"}}Customer{{else}}Supplier{{end}}</div>
+            <div class="signature-line"></div>
+            <div>
+                {{if .Customer}}({{.Customer.Name}}){{end}}
+                {{if .Supplier}}({{.Supplier.Name}}){{end}}
+            </div>
+        </div>
+        <div class="signature">
+            <div>Pembeli</div>
+            <div class="signature-line"></div>
+            <div>({{.Creator.FullName}})</div>
+        </div>
+        <div class="signature">
+            <div>Hormat Kami</div>
+            <div class="signature-line"></div>
+            <div>(Manager)</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #666;">
+        <p>Dokumen pembelian kendaraan. Simpan sebagai bukti transaksi yang sah.</p>
+        <p>Invoice ini dicetak pada {{.CreatedAt.Format "02 January 2006 15:04:05"}}</p>
+    </div>
+</body>
+</html>
