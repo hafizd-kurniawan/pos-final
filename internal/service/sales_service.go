@@ -192,6 +192,6 @@ func (s *salesService) GetDailySalesReport(ctx context.Context, date time.Time) 
 }
 
 func (s *salesService) GenerateInvoicePDF(ctx context.Context, invoiceID int) ([]byte, error) {
-	// TODO: Implement PDF generation
-	return nil, fmt.Errorf("PDF generation not implemented yet")
+	// This method is deprecated in favor of the dedicated InvoiceService
+	return nil, fmt.Errorf("use InvoiceService.GenerateSalesInvoicePDF instead")
 }

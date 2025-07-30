@@ -35,6 +35,7 @@ func main() {
 	workOrderRepo := repository.NewWorkOrderRepository(db.GetDB())
 	sparePartRepo := repository.NewSparePartRepository(db.GetDB())
 	workOrderPartRepo := repository.NewWorkOrderPartRepository(db.GetDB())
+	notificationRepo := repository.NewNotificationRepository(db.GetDB())
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.GetJWTDuration())
@@ -43,9 +44,11 @@ func main() {
 	customerService := service.NewCustomerService(customerRepo)
 	vehicleService := service.NewVehicleService(vehicleRepo)
 	sparePartService := service.NewSparePartService(sparePartRepo)
+	notificationService := service.NewNotificationService(notificationRepo, userRepo)
 	purchaseService := service.NewPurchaseService(purchaseRepo, vehicleRepo, workOrderRepo, userRepo)
 	salesService := service.NewSalesService(salesRepo, vehicleRepo)
 	workOrderService := service.NewWorkOrderService(workOrderRepo, vehicleRepo, sparePartRepo, workOrderPartRepo, userRepo)
+	invoiceService := service.NewInvoiceService(salesService, purchaseService, workOrderService)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -58,6 +61,8 @@ func main() {
 	purchaseHandler := handler.NewPurchaseHandler(purchaseService)
 	salesHandler := handler.NewSalesHandler(salesService)
 	workOrderHandler := handler.NewWorkOrderHandler(workOrderService)
+	pdfHandler := handler.NewPDFHandler(invoiceService)
+	notificationHandler := handler.NewNotificationHandler(notificationService)
 
 	// Initialize Gin router
 	router := gin.New()
@@ -68,7 +73,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, adminHandler, fileHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
+	setupRoutes(router, authHandler, adminHandler, fileHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, pdfHandler, notificationHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -91,6 +96,8 @@ func setupRoutes(
 	purchaseHandler *handler.PurchaseHandler,
 	salesHandler *handler.SalesHandler,
 	workOrderHandler *handler.WorkOrderHandler,
+	pdfHandler *handler.PDFHandler,
+	notificationHandler *handler.NotificationHandler,
 	cfg *config.Config,
 ) {
 	// Health check
@@ -251,6 +258,28 @@ func setupRoutes(
 			files.POST("/sales/:id/transfer-proof", fileHandler.UploadSalesTransferProof)
 			files.POST("/purchases/:id/transfer-proof", fileHandler.UploadPurchaseTransferProof)
 			files.DELETE("/delete", fileHandler.DeleteFile)
+		}
+
+		// PDF generation routes (admin + kasir)
+		pdf := protected.Group("/pdf")
+		pdf.Use(middleware.RequireAdminOrKasir())
+		{
+			pdf.GET("/sales/:id", pdfHandler.GenerateSalesInvoicePDF)
+			pdf.GET("/purchases/:id", pdfHandler.GeneratePurchaseInvoicePDF)
+			pdf.GET("/work-orders/:id", pdfHandler.GenerateWorkOrderPDF)
+			pdf.GET("/reports", pdfHandler.GenerateReportPDF)
+		}
+
+		// Notification routes (all authenticated users)
+		notifications := protected.Group("/notifications")
+		{
+			notifications.GET("/", notificationHandler.GetNotifications)
+			notifications.GET("/unread", notificationHandler.GetUnreadNotifications)
+			notifications.GET("/unread/count", notificationHandler.GetUnreadCount)
+			notifications.GET("/:id", notificationHandler.GetNotification)
+			notifications.PUT("/:id/read", notificationHandler.MarkAsRead)
+			notifications.PUT("/read-all", notificationHandler.MarkAllAsRead)
+			notifications.DELETE("/:id", notificationHandler.DeleteNotification)
 		}
 	}
 }

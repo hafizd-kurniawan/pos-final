@@ -182,6 +182,7 @@ type NotificationRepository interface {
 	MarkAsRead(ctx context.Context, id int) error
 	MarkAllAsReadByUserID(ctx context.Context, userID int) error
 	Count(ctx context.Context) (int, error)
+	CountByUserID(ctx context.Context, userID int) (int, error)
 	CountUnreadByUserID(ctx context.Context, userID int) (int, error)
 }
 
