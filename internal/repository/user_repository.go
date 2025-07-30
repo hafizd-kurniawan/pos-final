@@ -171,3 +171,21 @@ func (r *userRepository) Count(ctx context.Context) (int, error) {
 	
 	return count, nil
 }
+
+func (r *userRepository) GetByRole(ctx context.Context, role domain.UserRole) ([]*domain.User, error) {
+	var users []*domain.User
+	query := `
+		SELECT id, username, email, password_hash, full_name, phone, role, is_active,
+			   deleted_at, deleted_by, created_at, updated_at
+		FROM users
+		WHERE role = $1 AND deleted_at IS NULL AND is_active = true
+		ORDER BY created_at DESC
+	`
+	
+	err := r.db.SelectContext(ctx, &users, query, role)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by role: %w", err)
+	}
+	
+	return users, nil
+}

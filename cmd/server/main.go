@@ -28,14 +28,25 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db.GetDB())
-	// customerRepo := repository.NewCustomerRepository(db.GetDB())
-	// vehicleRepo := repository.NewVehicleRepository(db.GetDB())
+	// customerRepo := repository.NewCustomerRepository(db.GetDB()) // TODO: Will be used later
+	vehicleRepo := repository.NewVehicleRepository(db.GetDB())
+	purchaseRepo := repository.NewPurchaseInvoiceRepository(db.GetDB())
+	salesRepo := repository.NewSalesInvoiceRepository(db.GetDB())
+	workOrderRepo := repository.NewWorkOrderRepository(db.GetDB())
+	sparePartRepo := repository.NewSparePartRepository(db.GetDB())
+	workOrderPartRepo := repository.NewWorkOrderPartRepository(db.GetDB())
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.GetJWTDuration())
+	purchaseService := service.NewPurchaseService(purchaseRepo, vehicleRepo, workOrderRepo, userRepo)
+	salesService := service.NewSalesService(salesRepo, vehicleRepo)
+	workOrderService := service.NewWorkOrderService(workOrderRepo, vehicleRepo, sparePartRepo, workOrderPartRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
+	purchaseHandler := handler.NewPurchaseHandler(purchaseService)
+	salesHandler := handler.NewSalesHandler(salesService)
+	workOrderHandler := handler.NewWorkOrderHandler(workOrderService)
 
 	// Initialize Gin router
 	router := gin.New()
@@ -46,7 +57,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, cfg)
+	setupRoutes(router, authHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -57,7 +68,14 @@ func main() {
 	}
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handler.AuthHandler, cfg *config.Config) {
+func setupRoutes(
+	router *gin.Engine, 
+	authHandler *handler.AuthHandler,
+	purchaseHandler *handler.PurchaseHandler,
+	salesHandler *handler.SalesHandler,
+	workOrderHandler *handler.WorkOrderHandler,
+	cfg *config.Config,
+) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -88,6 +106,42 @@ func setupRoutes(router *gin.Engine, authHandler *handler.AuthHandler, cfg *conf
 			authProtected.POST("/change-password", authHandler.ChangePassword)
 		}
 
+		// Purchase Invoice routes (admin + kasir)
+		purchases := protected.Group("/purchases")
+		purchases.Use(middleware.RequireAdminOrKasir())
+		{
+			purchases.POST("/", purchaseHandler.CreatePurchaseInvoice)
+			purchases.GET("/", purchaseHandler.ListPurchaseInvoices)
+			purchases.GET("/:id", purchaseHandler.GetPurchaseInvoice)
+			purchases.GET("/reports/daily", purchaseHandler.GetDailyPurchaseReport)
+		}
+
+		// Sales Invoice routes (admin + kasir)
+		sales := protected.Group("/sales")
+		sales.Use(middleware.RequireAdminOrKasir())
+		{
+			sales.POST("/", salesHandler.CreateSalesInvoice)
+			sales.GET("/", salesHandler.ListSalesInvoices)
+			sales.GET("/:id", salesHandler.GetSalesInvoice)
+			sales.PUT("/:id", salesHandler.UpdateSalesInvoice)
+			sales.DELETE("/:id", salesHandler.DeleteSalesInvoice)
+			sales.GET("/reports/daily", salesHandler.GetDailySalesReport)
+		}
+
+		// Work Order routes (admin + mechanic)
+		workOrders := protected.Group("/work-orders")
+		{
+			workOrders.POST("/", middleware.RequireAdmin(), workOrderHandler.CreateWorkOrder)
+			workOrders.GET("/", workOrderHandler.ListWorkOrders)
+			workOrders.GET("/my", middleware.RequireMekanik(), workOrderHandler.ListMyWorkOrders)
+			workOrders.GET("/:id", workOrderHandler.GetWorkOrder)
+			workOrders.PUT("/:id/start", workOrderHandler.StartWorkOrder)
+			workOrders.PUT("/:id/complete", workOrderHandler.CompleteWorkOrder)
+			workOrders.PUT("/:id/progress", workOrderHandler.UpdateProgress)
+			workOrders.PUT("/:id/assign", middleware.RequireAdmin(), workOrderHandler.AssignMechanic)
+			workOrders.POST("/:id/use-part", workOrderHandler.UsePart)
+		}
+
 		// Admin-only routes
 		admin := protected.Group("/admin")
 		admin.Use(middleware.RequireAdmin())
@@ -106,16 +160,7 @@ func setupRoutes(router *gin.Engine, authHandler *handler.AuthHandler, cfg *conf
 			})
 		}
 
-		// Mekanik routes
-		mekanik := protected.Group("/mekanik")
-		mekanik.Use(middleware.RequireMekanik())
-		{
-			mekanik.GET("/work-orders", func(c *gin.Context) {
-				c.JSON(200, gin.H{"message": "Mekanik work orders - TODO"})
-			})
-		}
-
-		// Common protected routes
+		// Common protected routes (all authenticated users)
 		protected.GET("/customers", func(c *gin.Context) {
 			c.JSON(200, gin.H{"message": "Customers endpoint - TODO"})
 		})

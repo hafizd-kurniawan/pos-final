@@ -16,6 +16,7 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 	SoftDelete(ctx context.Context, id int, deletedBy int) error
 	Count(ctx context.Context) (int, error)
+	GetByRole(ctx context.Context, role domain.UserRole) ([]*domain.User, error)
 }
 
 // CustomerRepository defines methods for customer data access

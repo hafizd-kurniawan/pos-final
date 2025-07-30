@@ -127,6 +127,7 @@ type WorkOrderService interface {
 	StartWorkOrder(ctx context.Context, id int) error
 	CompleteWorkOrder(ctx context.Context, id int) error
 	AssignMechanic(ctx context.Context, id int, mechanicID int) error
+	UsePartInWorkOrder(ctx context.Context, workOrderID int, partID int, quantity int, usedBy int) error
 }
 
 // SparePartService defines methods for spare part management
@@ -141,7 +142,6 @@ type SparePartService interface {
 	UpdateSparePart(ctx context.Context, sparePart *domain.SparePart) error
 	DeleteSparePart(ctx context.Context, id int, deletedBy int) error
 	AdjustStock(ctx context.Context, partID int, adjustment int, notes string, adjustedBy int) error
-	UsePartInWorkOrder(ctx context.Context, workOrderID int, partID int, quantity int, usedBy int) error
 	CheckLowStock(ctx context.Context) ([]*domain.SparePart, error)
 }
 
