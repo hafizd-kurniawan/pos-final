@@ -39,6 +39,7 @@ func main() {
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.GetJWTDuration())
 	userService := service.NewUserService(userRepo)
+	fileService := service.NewFileService("./static/uploads")
 	customerService := service.NewCustomerService(customerRepo)
 	vehicleService := service.NewVehicleService(vehicleRepo)
 	sparePartService := service.NewSparePartService(sparePartRepo)
@@ -49,6 +50,7 @@ func main() {
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
 	adminHandler := handler.NewAdminHandler(userService)
+	fileHandler := handler.NewFileHandler(fileService, vehicleService, salesService, purchaseService)
 	customerHandler := handler.NewCustomerHandler(customerService)
 	vehicleHandler := handler.NewVehicleHandler(vehicleService)
 	sparePartHandler := handler.NewSparePartHandler(sparePartService)
@@ -66,7 +68,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, adminHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
+	setupRoutes(router, authHandler, adminHandler, fileHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -81,6 +83,7 @@ func setupRoutes(
 	router *gin.Engine, 
 	authHandler *handler.AuthHandler,
 	adminHandler *handler.AdminHandler,
+	fileHandler *handler.FileHandler,
 	customerHandler *handler.CustomerHandler,
 	vehicleHandler *handler.VehicleHandler,
 	sparePartHandler *handler.SparePartHandler,
@@ -97,6 +100,9 @@ func setupRoutes(
 			"message": "POS System API is running",
 		})
 	})
+
+	// Static file serving for uploads
+	router.Static("/static/uploads", "./static/uploads")
 
 	// API version 1
 	v1 := router.Group("/api/v1")
@@ -235,6 +241,16 @@ func setupRoutes(
 			sparePartsManage.PUT("/:id", sparePartHandler.UpdateSparePart)
 			sparePartsManage.POST("/:id/adjust-stock", sparePartHandler.AdjustStock)
 			sparePartsManage.DELETE("/:id", sparePartHandler.DeleteSparePart)
+		}
+
+		// File upload routes (admin + kasir)
+		files := protected.Group("/files")
+		files.Use(middleware.RequireAdminOrKasir())
+		{
+			files.POST("/vehicles/:id/photo", fileHandler.UploadVehiclePhoto)
+			files.POST("/sales/:id/transfer-proof", fileHandler.UploadSalesTransferProof)
+			files.POST("/purchases/:id/transfer-proof", fileHandler.UploadPurchaseTransferProof)
+			files.DELETE("/delete", fileHandler.DeleteFile)
 		}
 	}
 }
