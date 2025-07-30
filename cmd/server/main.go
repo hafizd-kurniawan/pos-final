@@ -38,6 +38,7 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.GetJWTDuration())
+	userService := service.NewUserService(userRepo)
 	customerService := service.NewCustomerService(customerRepo)
 	vehicleService := service.NewVehicleService(vehicleRepo)
 	sparePartService := service.NewSparePartService(sparePartRepo)
@@ -47,9 +48,11 @@ func main() {
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
+	adminHandler := handler.NewAdminHandler(userService)
 	customerHandler := handler.NewCustomerHandler(customerService)
 	vehicleHandler := handler.NewVehicleHandler(vehicleService)
 	sparePartHandler := handler.NewSparePartHandler(sparePartService)
+	dashboardHandler := handler.NewDashboardHandler(customerService, vehicleService, sparePartService, salesService, purchaseService, workOrderService)
 	purchaseHandler := handler.NewPurchaseHandler(purchaseService)
 	salesHandler := handler.NewSalesHandler(salesService)
 	workOrderHandler := handler.NewWorkOrderHandler(workOrderService)
@@ -63,7 +66,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, customerHandler, vehicleHandler, sparePartHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
+	setupRoutes(router, authHandler, adminHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -77,9 +80,11 @@ func main() {
 func setupRoutes(
 	router *gin.Engine, 
 	authHandler *handler.AuthHandler,
+	adminHandler *handler.AdminHandler,
 	customerHandler *handler.CustomerHandler,
 	vehicleHandler *handler.VehicleHandler,
 	sparePartHandler *handler.SparePartHandler,
+	dashboardHandler *handler.DashboardHandler,
 	purchaseHandler *handler.PurchaseHandler,
 	salesHandler *handler.SalesHandler,
 	workOrderHandler *handler.WorkOrderHandler,
@@ -155,18 +160,31 @@ func setupRoutes(
 		admin := protected.Group("/admin")
 		admin.Use(middleware.RequireAdmin())
 		{
-			admin.GET("/users", func(c *gin.Context) {
-				c.JSON(200, gin.H{"message": "Admin users endpoint - TODO"})
-			})
+			// User management
+			admin.GET("/users", adminHandler.ListUsers)
+			admin.POST("/users", adminHandler.CreateUser)
+			admin.GET("/users/:id", adminHandler.GetUser)
+			admin.PUT("/users/:id", adminHandler.UpdateUser)
+			admin.PUT("/users/:id/password", adminHandler.ChangeUserPassword)
+			admin.PUT("/users/:id/activate", adminHandler.ActivateUser)
+			admin.DELETE("/users/:id", adminHandler.DeleteUser)
+			
+			// Admin dashboard
+			admin.GET("/dashboard", dashboardHandler.GetDashboardStats)
 		}
 
 		// Kasir routes (admin + kasir)
 		kasir := protected.Group("/kasir")
 		kasir.Use(middleware.RequireAdminOrKasir())
 		{
-			kasir.GET("/dashboard", func(c *gin.Context) {
-				c.JSON(200, gin.H{"message": "Kasir dashboard - TODO"})
-			})
+			kasir.GET("/dashboard", dashboardHandler.GetKasirDashboard)
+		}
+
+		// Mechanic routes (mekanik only)
+		mechanic := protected.Group("/mechanic")
+		mechanic.Use(middleware.RequireMekanik())
+		{
+			mechanic.GET("/dashboard", dashboardHandler.GetMekanikDashboard)
 		}
 
 		// Customer routes (all authenticated users can view, admin + kasir can manage)

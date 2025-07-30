@@ -27,6 +27,7 @@ type UserService interface {
 	DeleteUser(ctx context.Context, id int, deletedBy int) error
 	GetUsersByRole(ctx context.Context, role domain.UserRole) ([]*domain.User, error)
 	ActivateUser(ctx context.Context, id int, isActive bool) error
+	ChangePassword(ctx context.Context, userID int, oldPassword, newPassword string) error
 }
 
 // CustomerService defines methods for customer management
