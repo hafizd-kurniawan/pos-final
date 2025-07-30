@@ -28,7 +28,7 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db.GetDB())
-	// customerRepo := repository.NewCustomerRepository(db.GetDB()) // TODO: Will be used later
+	customerRepo := repository.NewCustomerRepository(db.GetDB())
 	vehicleRepo := repository.NewVehicleRepository(db.GetDB())
 	purchaseRepo := repository.NewPurchaseInvoiceRepository(db.GetDB())
 	salesRepo := repository.NewSalesInvoiceRepository(db.GetDB())
@@ -38,12 +38,18 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWT.Secret, cfg.GetJWTDuration())
+	customerService := service.NewCustomerService(customerRepo)
+	vehicleService := service.NewVehicleService(vehicleRepo)
+	sparePartService := service.NewSparePartService(sparePartRepo)
 	purchaseService := service.NewPurchaseService(purchaseRepo, vehicleRepo, workOrderRepo, userRepo)
 	salesService := service.NewSalesService(salesRepo, vehicleRepo)
 	workOrderService := service.NewWorkOrderService(workOrderRepo, vehicleRepo, sparePartRepo, workOrderPartRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
+	customerHandler := handler.NewCustomerHandler(customerService)
+	vehicleHandler := handler.NewVehicleHandler(vehicleService)
+	sparePartHandler := handler.NewSparePartHandler(sparePartService)
 	purchaseHandler := handler.NewPurchaseHandler(purchaseService)
 	salesHandler := handler.NewSalesHandler(salesService)
 	workOrderHandler := handler.NewWorkOrderHandler(workOrderService)
@@ -57,7 +63,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
+	setupRoutes(router, authHandler, customerHandler, vehicleHandler, sparePartHandler, purchaseHandler, salesHandler, workOrderHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -71,6 +77,9 @@ func main() {
 func setupRoutes(
 	router *gin.Engine, 
 	authHandler *handler.AuthHandler,
+	customerHandler *handler.CustomerHandler,
+	vehicleHandler *handler.VehicleHandler,
+	sparePartHandler *handler.SparePartHandler,
 	purchaseHandler *handler.PurchaseHandler,
 	salesHandler *handler.SalesHandler,
 	workOrderHandler *handler.WorkOrderHandler,
@@ -160,17 +169,54 @@ func setupRoutes(
 			})
 		}
 
-		// Common protected routes (all authenticated users)
-		protected.GET("/customers", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Customers endpoint - TODO"})
-		})
+		// Customer routes (all authenticated users can view, admin + kasir can manage)
+		customers := protected.Group("/customers")
+		{
+			customers.GET("/", customerHandler.ListCustomers)
+			customers.GET("/:id", customerHandler.GetCustomer)
+		}
 		
-		protected.GET("/vehicles", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Vehicles endpoint - TODO"})
-		})
+		customersManage := protected.Group("/customers")
+		customersManage.Use(middleware.RequireAdminOrKasir())
+		{
+			customersManage.POST("/", customerHandler.CreateCustomer)
+			customersManage.PUT("/:id", customerHandler.UpdateCustomer)
+			customersManage.DELETE("/:id", customerHandler.DeleteCustomer)
+		}
 		
-		protected.GET("/spare-parts", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Spare parts endpoint - TODO"})
-		})
+		// Vehicle routes (all authenticated users can view, admin + kasir can manage)
+		vehicles := protected.Group("/vehicles")
+		{
+			vehicles.GET("/", vehicleHandler.ListVehicles)
+			vehicles.GET("/:id", vehicleHandler.GetVehicle)
+		}
+		
+		vehiclesManage := protected.Group("/vehicles")
+		vehiclesManage.Use(middleware.RequireAdminOrKasir())
+		{
+			vehiclesManage.POST("/", vehicleHandler.CreateVehicle)
+			vehiclesManage.PUT("/:id", vehicleHandler.UpdateVehicle)
+			vehiclesManage.PUT("/:id/status", vehicleHandler.UpdateVehicleStatus)
+			vehiclesManage.DELETE("/:id", vehicleHandler.DeleteVehicle)
+		}
+		
+		// Spare Parts routes (all authenticated users can view, admin + kasir can manage)
+		spareParts := protected.Group("/spare-parts")
+		{
+			spareParts.GET("/", sparePartHandler.ListSpareParts)
+			spareParts.GET("/low-stock", sparePartHandler.CheckLowStock)
+			spareParts.GET("/:id", sparePartHandler.GetSparePart)
+			spareParts.GET("/code/:code", sparePartHandler.GetSparePartByCode)
+			spareParts.GET("/barcode/:barcode", sparePartHandler.GetSparePartByBarcode)
+		}
+		
+		sparePartsManage := protected.Group("/spare-parts")
+		sparePartsManage.Use(middleware.RequireAdminOrKasir())
+		{
+			sparePartsManage.POST("/", sparePartHandler.CreateSparePart)
+			sparePartsManage.PUT("/:id", sparePartHandler.UpdateSparePart)
+			sparePartsManage.POST("/:id/adjust-stock", sparePartHandler.AdjustStock)
+			sparePartsManage.DELETE("/:id", sparePartHandler.DeleteSparePart)
+		}
 	}
 }
