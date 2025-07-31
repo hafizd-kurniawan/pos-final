@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"pos-final/internal/domain"
 	"pos-final/internal/repository"
@@ -99,16 +100,30 @@ func (s *salesService) GetSalesInvoiceByNumber(ctx context.Context, invoiceNumbe
 }
 
 func (s *salesService) ListSalesInvoices(ctx context.Context, page, limit int) ([]*domain.SalesInvoice, int, error) {
+	log.Printf("=== Sales Service: ListSalesInvoices ===")
+	log.Printf("Parameters: page=%d, limit=%d", page, limit)
+	
 	offset := (page - 1) * limit
+	log.Printf("Calculated offset: %d", offset)
+	
+	log.Printf("Calling repository.List with offset=%d, limit=%d", offset, limit)
 	invoices, err := s.salesRepo.List(ctx, offset, limit)
 	if err != nil {
+		log.Printf("ERROR: Repository List failed: %v", err)
 		return nil, 0, err
 	}
+	
+	log.Printf("Repository.List returned %d invoices", len(invoices))
 
+	log.Printf("Calling repository.Count")
 	count, err := s.salesRepo.Count(ctx)
 	if err != nil {
+		log.Printf("ERROR: Repository Count failed: %v", err)
 		return nil, 0, err
 	}
+	
+	log.Printf("Repository.Count returned: %d", count)
+	log.Printf("=== End Sales Service: ListSalesInvoices ===")
 
 	return invoices, count, nil
 }

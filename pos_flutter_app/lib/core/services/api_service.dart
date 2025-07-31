@@ -51,10 +51,11 @@ class ApiService {
   }) async {
     try {
       // Enhanced debug logging to identify URL construction issues
-      print('=== API GET Request Debug ===');
+      print('=== API GET Request Debug (Enhanced) ===');
       print('Base URL: "$baseUrl"');
       print('Endpoint: "$endpoint"');
       print('Query Params: $queryParams');
+      print('Auth Token Present: ${_authToken != null ? "YES" : "NO"}');
       
       var uri = Uri.parse('$baseUrl$endpoint');
       print('Initial URI: ${uri.toString()}');
@@ -69,49 +70,98 @@ class ApiService {
       print('Final Request URI: ${uri.toString()}');
       print('Request Headers: $_headers');
       
+      // Test server connectivity first
+      print('Testing server connectivity...');
+      try {
+        final healthUri = Uri.parse('$baseUrl').replace(path: '/health');
+        print('Health check URL: ${healthUri.toString()}');
+        final healthResponse = await http.get(healthUri).timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            throw TimeoutException('Health check timeout', const Duration(seconds: 5));
+          },
+        );
+        print('Health check status: ${healthResponse.statusCode}');
+        print('Health check response: ${healthResponse.body}');
+      } catch (healthError) {
+        print('Health check failed: $healthError');
+        print('Server might not be running or not accessible');
+      }
+      
+      print('Proceeding with actual API request...');
       final response = await http.get(uri, headers: _headers).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 15),
         onTimeout: () {
-          throw TimeoutException('Request timeout', const Duration(seconds: 10));
+          throw TimeoutException('Request timeout', const Duration(seconds: 15));
         },
       );
       
-      // Debug logging
+      // Enhanced debug logging
       print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body.length > 500 ? '${response.body.substring(0, 500)}...' : response.body}');
-      print('=== End API Debug ===');
+      print('API Response Headers: ${response.headers}');
+      print('API Response Content-Type: ${response.headers['content-type']}');
+      print('API Response Content-Length: ${response.headers['content-length']}');
+      print('API Response Body: ${response.body.length > 1000 ? '${response.body.substring(0, 1000)}...' : response.body}');
+      print('=== End Enhanced API Debug ===');
       
       return _handleResponse<T>(response, fromJson);
     } on SocketException catch (e) {
-      print('=== API GET Network Error ===');
-      print('Network Error: $e');
-      print('This might indicate the server is not running or not accessible.');
+      print('=== API GET Network Error (Enhanced) ===');
+      print('SocketException Details:');
+      print('  Message: ${e.message}');
+      print('  Address: ${e.address}');
+      print('  Port: ${e.port}');
+      print('  OSError: ${e.osError}');
+      print('Troubleshooting:');
+      print('  1. Check if the server is running on $baseUrl');
+      print('  2. Verify network connectivity');
+      print('  3. Check firewall settings');
+      print('  4. Verify the server address and port');
       print('Endpoint: "$endpoint"');
       print('Base URL: "$baseUrl"');
-      print('=== End Network Error Debug ===');
-      return ApiResponse.error('Network error: Unable to connect to server. Please check if the server is running.');
+      print('=== End Enhanced Network Error Debug ===');
+      return ApiResponse.error('Network connection failed: Unable to connect to server at $baseUrl. Please verify the server is running and accessible.');
     } on TimeoutException catch (e) {
-      print('=== API GET Timeout Error ===');
-      print('Timeout Error: $e');
+      print('=== API GET Timeout Error (Enhanced) ===');
+      print('TimeoutException Details:');
+      print('  Duration: ${e.duration}');
+      print('  Message: ${e.message}');
       print('Endpoint: "$endpoint"');
       print('Base URL: "$baseUrl"');
-      print('=== End Timeout Error Debug ===');
-      return ApiResponse.error('Request timeout: Server is taking too long to respond.');
+      print('Suggestion: Server might be overloaded or slow to respond');
+      print('=== End Enhanced Timeout Error Debug ===');
+      return ApiResponse.error('Request timeout: Server at $baseUrl is taking too long to respond (${e.duration}). Please try again.');
     } on HttpException catch (e) {
-      print('=== API GET HTTP Error ===');
-      print('HTTP Error: $e');
+      print('=== API GET HTTP Error (Enhanced) ===');
+      print('HttpException Details:');
+      print('  Message: ${e.message}');
+      print('  URI: ${e.uri}');
       print('Endpoint: "$endpoint"');
       print('Base URL: "$baseUrl"');
-      print('=== End HTTP Error Debug ===');
-      return ApiResponse.error('HTTP error: $e');
+      print('=== End Enhanced HTTP Error Debug ===');
+      return ApiResponse.error('HTTP error: ${e.message}');
+    } on FormatException catch (e) {
+      print('=== API GET Format Error (Enhanced) ===');
+      print('FormatException Details:');
+      print('  Message: ${e.message}');
+      print('  Source: ${e.source}');
+      print('  Offset: ${e.offset}');
+      print('This usually indicates an invalid URL format');
+      print('Base URL: "$baseUrl"');
+      print('Endpoint: "$endpoint"');
+      print('=== End Enhanced Format Error Debug ===');
+      return ApiResponse.error('Invalid URL format: ${e.message}');
     } catch (e, stackTrace) {
-      print('=== API GET Error Debug ===');
+      print('=== API GET Unexpected Error (Enhanced) ===');
       print('Error Type: ${e.runtimeType}');
-      print('Error: $e');
-      print('Stack Trace: $stackTrace');
-      print('Endpoint: "$endpoint"');
-      print('Base URL: "$baseUrl"');
-      print('=== End Error Debug ===');
+      print('Error Details: $e');
+      print('Stack Trace:');
+      print('$stackTrace');
+      print('Request Details:');
+      print('  Endpoint: "$endpoint"');
+      print('  Base URL: "$baseUrl"');
+      print('  Full URI: ${Uri.parse('$baseUrl$endpoint')}');
+      print('=== End Enhanced Unexpected Error Debug ===');
       return ApiResponse.error('Unexpected error: $e');
     }
   }

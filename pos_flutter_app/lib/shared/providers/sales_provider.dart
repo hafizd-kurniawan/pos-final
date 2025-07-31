@@ -38,6 +38,13 @@ class SalesProvider extends ChangeNotifier {
     _clearError();
     
     try {
+      print('=== Sales Provider: Loading Sales Invoices ===');
+      print('Request Parameters:');
+      print('  Page: $page');
+      print('  Limit: $limit');
+      print('  Customer ID: ${customerId ?? "All customers"}');
+      print('  Refresh: $refresh');
+      
       final queryParams = <String, dynamic>{
         'page': page,
         'limit': limit,
@@ -47,16 +54,29 @@ class SalesProvider extends ChangeNotifier {
         queryParams['customer_id'] = customerId;
       }
       
+      print('Final Query Params: $queryParams');
+      print('Calling API Service...');
+      
       final response = await _apiService.get<List<dynamic>>(
         '/sales',
         queryParams: queryParams,
       );
       
+      print('API Response received:');
+      print('  Success: ${response.isSuccess}');
+      print('  Has Raw Data: ${response.rawData != null}');
+      
       if (response.isSuccess && response.rawData != null) {
+        print('Processing successful response...');
         final data = response.rawData!['data'] as List<dynamic>;
+        print('Raw data type: ${data.runtimeType}');
+        print('Data items count: ${data.length}');
+        
         final newInvoices = data
             .map((invoice) => SalesInvoice.fromJson(invoice as Map<String, dynamic>))
             .toList();
+        
+        print('Successfully parsed ${newInvoices.length} invoices');
         
         if (page == 1) {
           _salesInvoices = newInvoices;
@@ -64,31 +84,63 @@ class SalesProvider extends ChangeNotifier {
           _salesInvoices.addAll(newInvoices);
         }
         
+        print('Total invoices in provider: ${_salesInvoices.length}');
+        
         // Update pagination info
         if (response.rawData!.containsKey('pagination')) {
           _pagination = PaginationInfo.fromJson(
             response.rawData!['pagination'] as Map<String, dynamic>
           );
+          print('Pagination info updated: Page ${_pagination?.page}, Total ${_pagination?.total}');
         }
+        
+        print('Sales invoices loaded successfully');
       } else {
         final errorMessage = response.error ?? 'Failed to load sales invoices';
-        print('Sales API Error: $errorMessage');
+        print('=== Sales API Response Error ===');
+        print('Error Message: $errorMessage');
+        print('Response Raw Data: ${response.rawData}');
+        print('Response Success: ${response.isSuccess}');
         
-        // If it's a network connectivity issue, don't show a harsh error
+        // Enhanced error categorization
         if (errorMessage.toLowerCase().contains('network') || 
             errorMessage.toLowerCase().contains('connect') ||
-            errorMessage.toLowerCase().contains('timeout')) {
-          _setError('Unable to connect to server. Please check your connection and try again.');
+            errorMessage.toLowerCase().contains('failed to fetch') ||
+            errorMessage.toLowerCase().contains('socket')) {
+          print('Categorized as: Network/Connectivity Error');
+          _setError('Network Error: Cannot connect to server. Please ensure:\n1. Server is running on the correct port\n2. Network connection is stable\n3. Firewall is not blocking the connection');
+        } else if (errorMessage.toLowerCase().contains('timeout')) {
+          print('Categorized as: Timeout Error');
+          _setError('Timeout Error: Server is responding slowly. Please try again.');
+        } else if (errorMessage.toLowerCase().contains('unauthorized') || errorMessage.toLowerCase().contains('401')) {
+          print('Categorized as: Authentication Error');
+          _setError('Authentication Error: Please log in again.');
+        } else if (errorMessage.toLowerCase().contains('forbidden') || errorMessage.toLowerCase().contains('403')) {
+          print('Categorized as: Permission Error');
+          _setError('Permission Error: You do not have access to this data.');
         } else {
-          _setError(errorMessage);
+          print('Categorized as: Unknown Error');
+          _setError('Error: $errorMessage');
         }
+        print('=== End Sales API Error Analysis ===');
       }
-    } catch (e) {
-      print('Sales Provider Error: $e');
-      _setError('Unable to load sales data. Please try again later.');
+    } catch (e, stackTrace) {
+      print('=== Sales Provider Exception ===');
+      print('Exception Type: ${e.runtimeType}');
+      print('Exception Message: $e');
+      print('Stack Trace:');
+      print('$stackTrace');
+      print('Request Details:');
+      print('  Endpoint: /sales');
+      print('  Page: $page');
+      print('  Limit: $limit');
+      print('  Customer ID: $customerId');
+      print('=== End Sales Provider Exception ===');
+      _setError('Unable to load sales data: $e. Please try again later.');
     }
     
     _setLoading(false);
+    print('=== End Sales Provider: Loading Sales Invoices ===');
   }
   
   // Get specific sales invoice

@@ -186,9 +186,10 @@ func CORS() gin.HandlerFunc {
 // Logger middleware for request logging
 func Logger() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+		// Enhanced logging format with more details
+		return fmt.Sprintf("[GIN] %s - [%s] \"%s %s %s\" %d %s \"%s\" \"%s\" Body: %s\n",
 			param.ClientIP,
-			param.TimeStamp.Format(time.RFC1123),
+			param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 			param.Method,
 			param.Path,
 			param.Request.Proto,
@@ -196,8 +197,25 @@ func Logger() gin.HandlerFunc {
 			param.Latency,
 			param.Request.UserAgent(),
 			param.ErrorMessage,
+			getRequestBody(param.Request),
 		)
 	})
+}
+
+// Helper function to safely extract request body information
+func getRequestBody(req *http.Request) string {
+	if req.Body == nil {
+		return "empty"
+	}
+	
+	contentType := req.Header.Get("Content-Type")
+	contentLength := req.Header.Get("Content-Length")
+	
+	if contentLength == "" || contentLength == "0" {
+		return "empty"
+	}
+	
+	return fmt.Sprintf("type=%s, length=%s", contentType, contentLength)
 }
 
 // Recovery middleware for panic recovery

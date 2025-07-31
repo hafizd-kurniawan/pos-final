@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"pos-final/internal/domain"
 	"pos-final/internal/service"
@@ -112,34 +113,68 @@ func (h *SalesHandler) GetSalesInvoice(c *gin.Context) {
 }
 
 func (h *SalesHandler) ListSalesInvoices(c *gin.Context) {
+	log.Printf("=== Sales Handler: ListSalesInvoices Request ===")
+	log.Printf("Request Method: %s", c.Request.Method)
+	log.Printf("Request URL: %s", c.Request.URL.String())
+	log.Printf("Request Headers: %v", c.Request.Header)
+	log.Printf("Client IP: %s", c.ClientIP())
+	log.Printf("User Agent: %s", c.Request.UserAgent())
+	
 	// Parse query parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	customerIDStr := c.Query("customer_id")
 
+	log.Printf("Query Parameters:")
+	log.Printf("  page: %d (raw: %s)", page, c.DefaultQuery("page", "1"))
+	log.Printf("  limit: %d (raw: %s)", limit, c.DefaultQuery("limit", "10"))
+	log.Printf("  customer_id: %s", customerIDStr)
+
 	if page < 1 {
+		log.Printf("Invalid page number %d, setting to 1", page)
 		page = 1
 	}
 	if limit < 1 || limit > 100 {
+		log.Printf("Invalid limit %d, setting to 10", limit)
 		limit = 10
 	}
+
+	log.Printf("Final parameters: page=%d, limit=%d", page, limit)
+
+	// Check user context
+	userID, exists := c.Get("user_id")
+	if !exists {
+		log.Printf("ERROR: User ID not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+	
+	userRole, _ := c.Get("role")
+	log.Printf("Request made by User ID: %v, Role: %v", userID, userRole)
 
 	var invoices []*domain.SalesInvoice
 	var total int
 	var err error
 
+	log.Printf("Calling sales service...")
+
 	if customerIDStr != "" {
 		customerID, err := strconv.Atoi(customerIDStr)
 		if err != nil {
+			log.Printf("ERROR: Invalid customer ID format: %s, error: %v", customerIDStr, err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid customer ID"})
 			return
 		}
+		log.Printf("Fetching sales invoices for customer ID: %d", customerID)
 		invoices, total, err = h.salesService.ListSalesInvoicesByCustomer(c.Request.Context(), customerID, page, limit)
 	} else {
+		log.Printf("Fetching all sales invoices")
 		invoices, total, err = h.salesService.ListSalesInvoices(c.Request.Context(), page, limit)
 	}
 
 	if err != nil {
+		log.Printf("ERROR: Sales service error: %v", err)
+		log.Printf("ERROR: Error type: %T", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to retrieve sales invoices",
 			"details": err.Error(),
@@ -147,15 +182,31 @@ func (h *SalesHandler) ListSalesInvoices(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	log.Printf("Sales service response:")
+	log.Printf("  Invoices count: %d", len(invoices))
+	log.Printf("  Total count: %d", total)
+	
+	if len(invoices) > 0 {
+		log.Printf("  First invoice ID: %d, Number: %s", invoices[0].ID, invoices[0].InvoiceNumber)
+		log.Printf("  Last invoice ID: %d, Number: %s", invoices[len(invoices)-1].ID, invoices[len(invoices)-1].InvoiceNumber)
+	}
+
+	responseData := gin.H{
 		"message": "Sales invoices retrieved successfully",
 		"data":    invoices,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
-			"total": total,
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": (total + limit - 1) / limit,
+			"has_next":    (page * limit) < total,
+			"has_prev":    page > 1,
 		},
-	})
+	}
+
+	log.Printf("Sending successful response with %d invoices", len(invoices))
+	c.JSON(http.StatusOK, responseData)
+	log.Printf("=== End Sales Handler: ListSalesInvoices ===")
 }
 
 func (h *SalesHandler) GetDailySalesReport(c *gin.Context) {
