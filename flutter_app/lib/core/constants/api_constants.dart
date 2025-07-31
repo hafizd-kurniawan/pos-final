@@ -111,42 +111,6 @@ extension UserRoleExtension on UserRole {
   }
 }
 
-/// Vehicle Status Enum
-enum VehicleStatus {
-  available,
-  inRepair,
-  sold,
-  reserved,
-}
-
-extension VehicleStatusExtension on VehicleStatus {
-  String get value {
-    switch (this) {
-      case VehicleStatus.available:
-        return 'available';
-      case VehicleStatus.inRepair:
-        return 'in_repair';
-      case VehicleStatus.sold:
-        return 'sold';
-      case VehicleStatus.reserved:
-        return 'reserved';
-    }
-  }
-  
-  String get displayName {
-    switch (this) {
-      case VehicleStatus.available:
-        return 'Available';
-      case VehicleStatus.inRepair:
-        return 'In Repair';
-      case VehicleStatus.sold:
-        return 'Sold';
-      case VehicleStatus.reserved:
-        return 'Reserved';
-    }
-  }
-}
-
 /// Work Order Status Enum
 enum WorkOrderStatus {
   pending,

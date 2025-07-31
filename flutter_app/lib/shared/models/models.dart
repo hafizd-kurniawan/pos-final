@@ -1,6 +1,40 @@
 /// Data Transfer Objects (DTOs) for API communication
 /// Matching the Go backend structure
 
+/// Vehicle Status Enum (matching Go backend)
+enum VehicleStatus {
+  available('available'),
+  inRepair('in_repair'),
+  sold('sold'),
+  reserved('reserved');
+
+  const VehicleStatus(this.value);
+  final String value;
+
+  static VehicleStatus fromString(String value) {
+    return VehicleStatus.values.firstWhere(
+      (status) => status.value == value,
+      orElse: () => VehicleStatus.available,
+    );
+  }
+
+  String get displayName {
+    switch (this) {
+      case VehicleStatus.available:
+        return 'Available';
+      case VehicleStatus.inRepair:
+        return 'In Repair';
+      case VehicleStatus.sold:
+        return 'Sold';
+      case VehicleStatus.reserved:
+        return 'Reserved';
+    }
+  }
+
+  @override
+  String toString() => value;
+}
+
 /// Base API Response
 class ApiResponse<T> {
   final String? message;
