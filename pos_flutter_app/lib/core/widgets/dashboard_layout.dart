@@ -27,6 +27,7 @@ class DashboardLayout extends StatelessWidget {
   final String selectedMenuItem;
   final Function(String) onMenuItemSelected;
   final Widget body;
+  final List<Widget>? actions;
 
   const DashboardLayout({
     super.key,
@@ -35,6 +36,7 @@ class DashboardLayout extends StatelessWidget {
     required this.selectedMenuItem,
     required this.onMenuItemSelected,
     required this.body,
+    this.actions,
   });
 
   @override
@@ -322,6 +324,12 @@ class DashboardLayout extends StatelessWidget {
               ],
             ),
           ),
+
+          // Custom actions
+          if (actions != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            ...actions!,
+          ],
 
           // Notifications
           Consumer<NotificationProvider>(

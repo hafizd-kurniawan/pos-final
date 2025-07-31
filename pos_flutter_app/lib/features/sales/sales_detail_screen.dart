@@ -226,10 +226,10 @@ class _SalesDetailScreenState extends State<SalesDetailScreen> {
             const SizedBox(height: AppSpacing.md),
             if (customer != null) ...[
               _buildInfoRow('Name', customer.name, Icons.person),
-              _buildInfoRow('Phone', customer.phone, Icons.phone),
-              _buildInfoRow('Email', customer.email, Icons.email),
-              if (customer.address.isNotEmpty)
-                _buildInfoRow('Address', customer.address, Icons.location_on),
+              _buildInfoRow('Phone', customer.phone ?? 'No phone', Icons.phone),
+              _buildInfoRow('Email', customer.email ?? 'No email', Icons.email),
+              if (customer.address?.isNotEmpty == true)
+                _buildInfoRow('Address', customer.address!, Icons.location_on),
             ] else ...[
               Text(
                 'Customer information not available',
@@ -270,11 +270,11 @@ class _SalesDetailScreenState extends State<SalesDetailScreen> {
             if (vehicle != null) ...[
               _buildInfoRow('Brand & Model', '${vehicle.brand} ${vehicle.model}', Icons.directions_car),
               _buildInfoRow('Year', vehicle.year.toString(), Icons.calendar_today),
-              _buildInfoRow('License Plate', vehicle.licensePlate, Icons.confirmation_number),
-              _buildInfoRow('Engine', vehicle.engine, Icons.settings),
-              _buildInfoRow('Color', vehicle.color, Icons.palette),
-              if (vehicle.description.isNotEmpty)
-                _buildInfoRow('Description', vehicle.description, Icons.description),
+              _buildInfoRow('License Plate', vehicle.plateNumber ?? 'No plate', Icons.confirmation_number),
+              _buildInfoRow('Engine', vehicle.engineNumber ?? 'No engine info', Icons.settings),
+              _buildInfoRow('Color', vehicle.color ?? 'No color info', Icons.palette),
+              if (vehicle.conditionNotes?.isNotEmpty == true)
+                _buildInfoRow('Description', vehicle.conditionNotes!, Icons.description),
             ] else ...[
               Text(
                 'Vehicle information not available',

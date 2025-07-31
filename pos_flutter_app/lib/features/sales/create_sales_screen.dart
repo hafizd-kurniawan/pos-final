@@ -152,7 +152,7 @@ class _CreateSalesScreenState extends State<CreateSalesScreen> {
                         children: [
                           Text(customer.name),
                           Text(
-                            customer.phone,
+                            customer.phone ?? 'No phone',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -261,7 +261,7 @@ class _CreateSalesScreenState extends State<CreateSalesScreen> {
                         children: [
                           Text('${vehicle.brand} ${vehicle.model}'),
                           Text(
-                            '${vehicle.year} - Rp ${_formatCurrency(vehicle.price)}',
+                            '${vehicle.year} - Rp ${_formatCurrency(vehicle.sellingPrice ?? 0)}',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -274,7 +274,7 @@ class _CreateSalesScreenState extends State<CreateSalesScreen> {
                     setState(() {
                       _selectedVehicle = vehicle;
                       if (vehicle != null) {
-                        _priceController.text = vehicle.price.toStringAsFixed(0);
+                        _priceController.text = (vehicle.sellingPrice ?? 0).toStringAsFixed(0);
                       }
                     });
                   },
@@ -429,14 +429,14 @@ class _CreateSalesScreenState extends State<CreateSalesScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             _buildSummaryRow('Customer:', _selectedCustomer!.name),
-            _buildSummaryRow('Phone:', _selectedCustomer!.phone),
+            _buildSummaryRow('Phone:', _selectedCustomer!.phone ?? 'No phone'),
             const Divider(),
             _buildSummaryRow(
               'Vehicle:',
               '${_selectedVehicle!.brand} ${_selectedVehicle!.model}',
             ),
             _buildSummaryRow('Year:', _selectedVehicle!.year.toString()),
-            _buildSummaryRow('License Plate:', _selectedVehicle!.licensePlate),
+            _buildSummaryRow('License Plate:', _selectedVehicle!.plateNumber ?? 'N/A'),
             const Divider(),
             _buildSummaryRow('Payment Method:', _paymentMethod.toUpperCase()),
             _buildSummaryRow(

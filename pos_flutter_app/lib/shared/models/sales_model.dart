@@ -1,3 +1,6 @@
+import 'customer_model.dart';
+import 'vehicle_model.dart';
+
 class SalesInvoice {
   final int id;
   final String invoiceNumber;
@@ -93,6 +96,3 @@ class CreateSalesRequest {
     };
   }
 }
-
-import 'customer_model.dart';
-import 'vehicle_model.dart';
