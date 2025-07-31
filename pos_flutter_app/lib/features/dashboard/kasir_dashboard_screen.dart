@@ -8,6 +8,7 @@ import '../../shared/providers/auth_provider.dart';
 import '../../shared/providers/notification_provider.dart';
 import '../../core/widgets/dashboard_layout.dart';
 import '../../core/widgets/stats_card.dart';
+import '../vehicles/vehicle_management_widget.dart';
 
 class KasirDashboardScreen extends StatefulWidget {
   const KasirDashboardScreen({super.key});
@@ -312,29 +313,7 @@ class _KasirDashboardScreenState extends State<KasirDashboardScreen> {
   }
 
   Widget _buildVehiclesContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_car,
-            size: 64,
-            color: AppColors.success,
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            'Vehicle Inventory',
-            style: AppTextStyles.headlineMedium,
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            'Vehicle inventory management features will be implemented here',
-            style: AppTextStyles.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    return const VehicleManagementWidget();
   }
 
   Widget _buildCustomersContent() {
