@@ -1,0 +1,35 @@
+name: pos_flutter
+description: Modern Point of Sale System for Vehicle Management
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+  flutter: ">=3.13.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Essential UI only
+  cupertino_icons: ^1.0.6
+  
+  # HTTP client for API calls
+  http: ^1.1.0
+  
+  # Local storage for auth tokens
+  shared_preferences: ^2.2.2
+  
+  # Image picker for photo uploads
+  image_picker: ^1.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

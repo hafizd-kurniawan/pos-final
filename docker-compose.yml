@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pos_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: pos_db
+      POSTGRES_USER: pos_user
+      POSTGRES_PASSWORD: pos_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    networks:
+      - pos_network
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: pos_app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=pos_user
+      - DB_PASSWORD=pos_password
+      - DB_NAME=pos_db
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - GIN_MODE=debug
+    depends_on:
+      - postgres
+    networks:
+      - pos_network
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./templates:/app/templates
+
+volumes:
+  postgres_data:
+
+networks:
+  pos_network:
+    driver: bridge
