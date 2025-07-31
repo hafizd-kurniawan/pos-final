@@ -48,7 +48,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           children: [
             // Photo Gallery
             _buildPhotoGallery(),
-            
+
             // Vehicle Information
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -73,7 +73,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
   Widget _buildPhotoGallery() {
     final photos = widget.vehicle.photos ?? [];
-    
+
     if (photos.isEmpty && !widget.vehicle.hasPhoto) {
       return Container(
         height: 300,
@@ -99,8 +99,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     }
 
     // Use primary photo if available, otherwise first photo
-    final displayPhoto = widget.vehicle.primaryPhoto ?? photos.firstOrNull?.photoPath;
-    
+    final displayPhoto = widget.vehicle.primaryPhoto;
+
     return Column(
       children: [
         // Main Photo
@@ -110,7 +110,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           color: AppColors.surfaceVariant,
           child: displayPhoto != null
               ? CachedNetworkImage(
-                  imageUrl: '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}/static/uploads/$displayPhoto',
+                  imageUrl:
+                      '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}/static/uploads/$displayPhoto',
                   fit: BoxFit.cover,
                   placeholder: (context, url) => const Center(
                     child: CircularProgressIndicator(),
@@ -144,7 +145,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               itemBuilder: (context, index) {
                 final photo = photos[index];
                 final isSelected = _selectedPhotoIndex == index;
-                
+
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -157,7 +158,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     margin: const EdgeInsets.only(right: AppSpacing.sm),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.border,
+                        color:
+                            isSelected ? AppColors.primary : AppColors.border,
                         width: isSelected ? 2 : 1,
                       ),
                       borderRadius: BorderRadius.circular(AppBorderRadius.md),
@@ -165,7 +167,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppBorderRadius.md),
                       child: CachedNetworkImage(
-                        imageUrl: '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}/static/uploads/${photo.photoPath}',
+                        imageUrl:
+                            '${AppConstants.apiBaseUrl.replaceAll('/api/v1', '')}/static/uploads/${photo.photoPath}',
                         fit: BoxFit.cover,
                         placeholder: (context, url) => const Center(
                           child: CircularProgressIndicator(),
@@ -214,7 +217,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        
+
         // Basic Details Grid
         _buildInfoGrid([
           _InfoItem('Brand', widget.vehicle.brand),
@@ -235,13 +238,16 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           style: AppTextStyles.headlineSmall,
         ),
         const SizedBox(height: AppSpacing.md),
-        
         _buildInfoGrid([
           _InfoItem('Fuel Type', widget.vehicle.fuelType ?? 'Not specified'),
-          _InfoItem('Transmission', widget.vehicle.transmission ?? 'Not specified'),
-          _InfoItem('Chassis Number', widget.vehicle.chassisNumber ?? 'Not specified'),
-          _InfoItem('Engine Number', widget.vehicle.engineNumber ?? 'Not specified'),
-          _InfoItem('License Plate', widget.vehicle.plateNumber ?? 'Not specified'),
+          _InfoItem(
+              'Transmission', widget.vehicle.transmission ?? 'Not specified'),
+          _InfoItem('Chassis Number',
+              widget.vehicle.chassisNumber ?? 'Not specified'),
+          _InfoItem(
+              'Engine Number', widget.vehicle.engineNumber ?? 'Not specified'),
+          _InfoItem(
+              'License Plate', widget.vehicle.plateNumber ?? 'Not specified'),
         ]),
       ],
     );
@@ -256,30 +262,24 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           style: AppTextStyles.headlineSmall,
         ),
         const SizedBox(height: AppSpacing.md),
-        
         _buildInfoGrid([
           _InfoItem(
-            'Purchase Price', 
-            widget.vehicle.purchasePrice != null 
-                ? 'Rp ${_formatCurrency(widget.vehicle.purchasePrice!)}'
-                : 'Not specified'
-          ),
+              'Purchase Price',
+              widget.vehicle.purchasePrice != null
+                  ? 'Rp ${_formatCurrency(widget.vehicle.purchasePrice!)}'
+                  : 'Not specified'),
+          _InfoItem('Repair Cost',
+              'Rp ${_formatCurrency(widget.vehicle.repairCost)}'),
           _InfoItem(
-            'Repair Cost', 
-            'Rp ${_formatCurrency(widget.vehicle.repairCost)}'
-          ),
+              'HPP (Cost of Goods)',
+              widget.vehicle.hpp != null
+                  ? 'Rp ${_formatCurrency(widget.vehicle.hpp!)}'
+                  : 'Not calculated'),
           _InfoItem(
-            'HPP (Cost of Goods)', 
-            widget.vehicle.hpp != null 
-                ? 'Rp ${_formatCurrency(widget.vehicle.hpp!)}'
-                : 'Not calculated'
-          ),
-          _InfoItem(
-            'Selling Price', 
-            widget.vehicle.sellingPrice != null 
-                ? 'Rp ${_formatCurrency(widget.vehicle.sellingPrice!)}'
-                : 'Not set'
-          ),
+              'Selling Price',
+              widget.vehicle.sellingPrice != null
+                  ? 'Rp ${_formatCurrency(widget.vehicle.sellingPrice!)}'
+                  : 'Not set'),
         ]),
       ],
     );
@@ -294,32 +294,24 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           style: AppTextStyles.headlineSmall,
         ),
         const SizedBox(height: AppSpacing.md),
-        
         _buildInfoGrid([
           _InfoItem(
-            'Purchased Date', 
-            widget.vehicle.purchasedDate != null 
-                ? _formatDate(widget.vehicle.purchasedDate!)
-                : 'Not specified'
-          ),
+              'Purchased Date',
+              widget.vehicle.purchasedDate != null
+                  ? _formatDate(widget.vehicle.purchasedDate!)
+                  : 'Not specified'),
           _InfoItem(
-            'Sold Date', 
-            widget.vehicle.soldDate != null 
-                ? _formatDate(widget.vehicle.soldDate!)
-                : 'Not sold'
-          ),
+              'Sold Date',
+              widget.vehicle.soldDate != null
+                  ? _formatDate(widget.vehicle.soldDate!)
+                  : 'Not sold'),
+          _InfoItem('Created Date', _formatDate(widget.vehicle.createdAt)),
           _InfoItem(
-            'Created Date', 
-            _formatDate(widget.vehicle.createdAt)
-          ),
-          _InfoItem(
-            'Last Updated', 
-            widget.vehicle.updatedAt != null 
-                ? _formatDate(widget.vehicle.updatedAt!)
-                : 'Never updated'
-          ),
+              'Last Updated',
+              widget.vehicle.updatedAt != null
+                  ? _formatDate(widget.vehicle.updatedAt!)
+                  : 'Never updated'),
         ]),
-        
         if (widget.vehicle.conditionNotes != null) ...[
           const SizedBox(height: AppSpacing.md),
           Text(
@@ -349,7 +341,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
-        
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -398,7 +390,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   Widget _buildStatusChip(String status) {
     Color color;
     String label;
-    
+
     switch (status) {
       case 'available':
         color = AppColors.available;
@@ -444,9 +436,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
   String _formatCurrency(double amount) {
     // Simple currency formatting
     return amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    );
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        );
   }
 
   String _formatDate(DateTime date) {
@@ -457,10 +449,11 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 class _InfoItem {
   final String label;
   final String value;
-  
+
   _InfoItem(this.label, this.value);
 }
 
 extension ListExtension<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;
 }
+

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_theme.dart';
+import '../constants/app_theme.dart';
 
 class AppConfig {
   static ThemeData get lightTheme {
@@ -15,7 +15,7 @@ class AppConfig {
         background: AppColors.background,
         error: AppColors.error,
       ),
-      
+
       // App Bar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
@@ -25,9 +25,9 @@ class AppConfig {
         titleTextStyle: AppTextStyles.headlineMedium,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
-      
+
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 2,
         shadowColor: AppColors.shadow,
@@ -35,7 +35,7 @@ class AppConfig {
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
         ),
       ),
-      
+
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -54,7 +54,7 @@ class AppConfig {
           ),
         ),
       ),
-      
+
       // Outlined Button Theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -70,7 +70,7 @@ class AppConfig {
           ),
         ),
       ),
-      
+
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -85,7 +85,7 @@ class AppConfig {
           ),
         ),
       ),
-      
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -115,7 +115,7 @@ class AppConfig {
           color: AppColors.textTertiary,
         ),
       ),
-      
+
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceVariant,
@@ -126,9 +126,9 @@ class AppConfig {
           borderRadius: BorderRadius.circular(AppBorderRadius.circular),
         ),
       ),
-      
+
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.lg),
@@ -136,13 +136,13 @@ class AppConfig {
         titleTextStyle: AppTextStyles.headlineSmall,
         contentTextStyle: AppTextStyles.bodyMedium,
       ),
-      
+
       // Drawer Theme
       drawerTheme: const DrawerThemeData(
         backgroundColor: AppColors.surface,
         elevation: 4,
       ),
-      
+
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
@@ -151,20 +151,20 @@ class AppConfig {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      
+
       // Icon Theme
       iconTheme: const IconThemeData(
         color: AppColors.textSecondary,
         size: 24,
       ),
-      
+
       // Divider Theme
       dividerTheme: const DividerThemeData(
         color: AppColors.border,
         thickness: 1,
         space: 1,
       ),
-      
+
       // Text Theme
       textTheme: const TextTheme(
         displayLarge: AppTextStyles.displayLarge,
@@ -186,3 +186,4 @@ class AppConfig {
     );
   }
 }
+
