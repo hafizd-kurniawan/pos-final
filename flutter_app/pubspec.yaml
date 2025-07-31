@@ -13,31 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # State Management
-  provider: ^6.1.1
-  
-  # HTTP & API
-  http: ^1.1.0
-  dio: ^5.3.2
-  
-  # Local Storage
-  shared_preferences: ^2.2.2
-  
-  # UI & Design
+  # Essential UI only
   cupertino_icons: ^1.0.6
-  
-  # Navigation
-  go_router: ^12.1.1
-  
-  # Image & File Handling
-  image_picker: ^1.0.4
-  cached_network_image: ^3.3.0
-  
-  # Web-compatible file handling
-  image_picker_for_web: ^3.0.0
-  
-  # Utilities
-  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
