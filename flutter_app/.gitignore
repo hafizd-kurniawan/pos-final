@@ -1,0 +1,27 @@
+# Ignore build artifacts
+/build/
+/android/app/build/
+/ios/Runner.app/
+/windows/runner/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package dependencies
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Temporary files
+*.tmp
+*.temp
+*.log
