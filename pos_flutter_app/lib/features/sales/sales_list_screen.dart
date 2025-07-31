@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_theme.dart';
-import '../../core/widgets/dashboard_layout.dart';
 import '../../shared/providers/sales_provider.dart';
 import '../../shared/models/sales_model.dart';
 import 'create_sales_screen.dart';
@@ -34,30 +33,33 @@ class _SalesListScreenState extends State<SalesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardLayout(
-      title: 'Sales Management',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh),
-          onPressed: () {
-            context.read<SalesProvider>().loadSalesInvoices(refresh: true);
-          },
-        ),
-        const SizedBox(width: AppSpacing.md),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreateSalesScreen(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.add, size: 20),
-          label: const Text('New Sale'),
-        ),
-      ],
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sales Management'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<SalesProvider>().loadSalesInvoices(refresh: true);
+            },
+          ),
+          const SizedBox(width: AppSpacing.md),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateSalesScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add, size: 20),
+            label: const Text('New Sale'),
+          ),
+          const SizedBox(width: AppSpacing.md),
+        ],
+      ),
+      body: Column(
         children: [
           _buildSearchAndFilters(),
           const SizedBox(height: AppSpacing.lg),

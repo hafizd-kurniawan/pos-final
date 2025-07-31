@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_theme.dart';
-import '../../core/widgets/dashboard_layout.dart';
 import '../../shared/providers/sales_provider.dart';
 import '../../shared/providers/customer_provider.dart';
 import '../../shared/providers/vehicle_provider.dart';
@@ -48,26 +47,29 @@ class _CreateSalesScreenState extends State<CreateSalesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardLayout(
-      title: 'Create New Sale',
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _submitSale,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Create Sale'),
-        ),
-      ],
-      child: Form(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create New Sale'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          ElevatedButton(
+            onPressed: _isLoading ? null : _submitSale,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Create Sale'),
+          ),
+          const SizedBox(width: AppSpacing.md),
+        ],
+      ),
+      body: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),

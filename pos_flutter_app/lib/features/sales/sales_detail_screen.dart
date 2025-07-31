@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_theme.dart';
-import '../../core/widgets/dashboard_layout.dart';
 import '../../shared/providers/sales_provider.dart';
 import '../../shared/models/sales_model.dart';
 
@@ -42,23 +41,26 @@ class _SalesDetailScreenState extends State<SalesDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardLayout(
-      title: 'Sales Invoice',
-      actions: [
-        if (_invoice != null) ...[
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadInvoice,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          ElevatedButton.icon(
-            onPressed: _generatePDF,
-            icon: const Icon(Icons.picture_as_pdf, size: 20),
-            label: const Text('PDF'),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sales Invoice'),
+        actions: [
+          if (_invoice != null) ...[
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadInvoice,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            ElevatedButton.icon(
+              onPressed: _generatePDF,
+              icon: const Icon(Icons.picture_as_pdf, size: 20),
+              label: const Text('PDF'),
+            ),
+            const SizedBox(width: AppSpacing.md),
+          ],
         ],
-      ],
-      child: _isLoading
+      ),
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _invoice == null
               ? _buildErrorView()
