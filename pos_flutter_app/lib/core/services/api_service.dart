@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 
@@ -68,7 +69,12 @@ class ApiService {
       print('Final Request URI: ${uri.toString()}');
       print('Request Headers: $_headers');
       
-      final response = await http.get(uri, headers: _headers);
+      final response = await http.get(uri, headers: _headers).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Request timeout', const Duration(seconds: 10));
+        },
+      );
       
       // Debug logging
       print('API Response Status: ${response.statusCode}');
@@ -76,6 +82,28 @@ class ApiService {
       print('=== End API Debug ===');
       
       return _handleResponse<T>(response, fromJson);
+    } on SocketException catch (e) {
+      print('=== API GET Network Error ===');
+      print('Network Error: $e');
+      print('This might indicate the server is not running or not accessible.');
+      print('Endpoint: "$endpoint"');
+      print('Base URL: "$baseUrl"');
+      print('=== End Network Error Debug ===');
+      return ApiResponse.error('Network error: Unable to connect to server. Please check if the server is running.');
+    } on TimeoutException catch (e) {
+      print('=== API GET Timeout Error ===');
+      print('Timeout Error: $e');
+      print('Endpoint: "$endpoint"');
+      print('Base URL: "$baseUrl"');
+      print('=== End Timeout Error Debug ===');
+      return ApiResponse.error('Request timeout: Server is taking too long to respond.');
+    } on HttpException catch (e) {
+      print('=== API GET HTTP Error ===');
+      print('HTTP Error: $e');
+      print('Endpoint: "$endpoint"');
+      print('Base URL: "$baseUrl"');
+      print('=== End HTTP Error Debug ===');
+      return ApiResponse.error('HTTP error: $e');
     } catch (e, stackTrace) {
       print('=== API GET Error Debug ===');
       print('Error Type: ${e.runtimeType}');
@@ -84,7 +112,7 @@ class ApiService {
       print('Endpoint: "$endpoint"');
       print('Base URL: "$baseUrl"');
       print('=== End Error Debug ===');
-      return ApiResponse.error('Network error: $e');
+      return ApiResponse.error('Unexpected error: $e');
     }
   }
   

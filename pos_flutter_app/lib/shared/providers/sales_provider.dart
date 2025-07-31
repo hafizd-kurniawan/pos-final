@@ -71,10 +71,21 @@ class SalesProvider extends ChangeNotifier {
           );
         }
       } else {
-        _setError(response.error ?? 'Failed to load sales invoices');
+        final errorMessage = response.error ?? 'Failed to load sales invoices';
+        print('Sales API Error: $errorMessage');
+        
+        // If it's a network connectivity issue, don't show a harsh error
+        if (errorMessage.toLowerCase().contains('network') || 
+            errorMessage.toLowerCase().contains('connect') ||
+            errorMessage.toLowerCase().contains('timeout')) {
+          _setError('Unable to connect to server. Please check your connection and try again.');
+        } else {
+          _setError(errorMessage);
+        }
       }
     } catch (e) {
-      _setError('Error loading sales invoices: $e');
+      print('Sales Provider Error: $e');
+      _setError('Unable to load sales data. Please try again later.');
     }
     
     _setLoading(false);
