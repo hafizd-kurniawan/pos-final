@@ -1,13 +1,31 @@
 #!/bin/bash
 
-echo "🚀 POS System Quick Start with Enhanced Debugging"
-echo "=================================================="
+echo "🚀 STARTING POS SYSTEM WITH REACT WEB APP"
+echo "=========================================="
 
 # Check if we're in the right directory
 if [ ! -f "go.mod" ]; then
     echo "❌ Please run this script from the pos-final root directory"
     exit 1
 fi
+
+# Check if Go is installed
+if ! command -v go &> /dev/null; then
+    echo "❌ Go is not installed. Please install Go first."
+    exit 1
+fi
+
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed. Please install Node.js first."
+    exit 1
+fi
+
+echo "🔍 ENVIRONMENT CHECK"
+echo "Go version: $(go version)"
+echo "Node.js version: $(node --version)"
+echo "NPM version: $(npm --version)"
+echo ""
 
 echo "🔧 Building server..."
 go build -o server cmd/server/main.go
@@ -20,13 +38,15 @@ fi
 echo "✅ Server built successfully"
 
 echo ""
-echo "🌐 Testing server connectivity..."
+echo "🏥 HEALTH CHECK"
+echo "Testing server connectivity..."
 if ./server &
     SERVER_PID=$!
     sleep 3
     
     if curl -s http://localhost:8080/health > /dev/null; then
         echo "✅ Server is running and responsive"
+        echo "📊 Server health: $(curl -s http://localhost:8080/health)"
         kill $SERVER_PID
     else
         echo "❌ Server is not responding"
@@ -39,7 +59,7 @@ else
 fi
 
 echo ""
-echo "🎯 Starting POS System with enhanced debugging..."
+echo "🎯 Starting POS System with React Web App..."
 echo ""
 
 # Function to start server
@@ -51,14 +71,21 @@ start_server() {
     sleep 2
 }
 
-# Function to start Flutter
-start_flutter() {
-    echo "📱 Starting Flutter app with browser-compatible settings..."
-    cd pos_flutter_app
-    echo "Using HTML renderer for better CORS compatibility..."
-    flutter run -d chrome --web-renderer html &
-    FLUTTER_PID=$!
-    echo "Flutter PID: $FLUTTER_PID"
+# Function to start React app
+start_react() {
+    echo "🌐 Starting React web application..."
+    cd pos-web-app
+    
+    # Install dependencies if needed
+    if [ ! -d "node_modules" ]; then
+        echo "📦 Installing dependencies..."
+        npm install
+    fi
+    
+    echo "🔧 Starting React development server..."
+    BROWSER=none npm start &
+    REACT_PID=$!
+    echo "React PID: $REACT_PID"
     cd ..
 }
 
@@ -70,9 +97,9 @@ cleanup() {
         kill $SERVER_PID 2>/dev/null
         echo "✅ Server stopped"
     fi
-    if [ ! -z "$FLUTTER_PID" ]; then
-        kill $FLUTTER_PID 2>/dev/null
-        echo "✅ Flutter stopped"
+    if [ ! -z "$REACT_PID" ]; then
+        kill $REACT_PID 2>/dev/null
+        echo "✅ React app stopped"
     fi
     exit 0
 }
@@ -82,21 +109,25 @@ trap cleanup EXIT INT TERM
 
 # Start services
 start_server
-start_flutter
+start_react
 
 echo ""
 echo "🎉 POS System is starting up!"
 echo ""
 echo "📊 Monitoring setup:"
-echo "  🌐 Server: http://localhost:8080"
-echo "  📱 Flutter Web: Will open automatically"
+echo "  🌐 Backend Server: http://localhost:8080"
+echo "  🌐 React Web App: http://localhost:3000"
 echo "  🩺 Health Check: http://localhost:8080/health"
 echo ""
 echo "🔍 Enhanced logging is active:"
-echo "  ✅ Ultra-detailed Flutter API debugging"
+echo "  ✅ Ultra-detailed React API debugging"
 echo "  ✅ Comprehensive Golang request tracking"
-echo "  ✅ CORS troubleshooting information"
-echo "  ✅ Browser-specific error analysis"
+echo "  ✅ No CORS issues with React"
+echo "  ✅ Real-time error monitoring"
+echo ""
+echo "🔐 LOGIN CREDENTIALS"
+echo "Username: kasir1"
+echo "Password: password123"
 echo ""
 echo "⏸️  Press Ctrl+C to stop both services"
 echo ""
