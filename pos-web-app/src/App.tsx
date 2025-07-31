@@ -7,7 +7,10 @@ import DashboardPage from './pages/DashboardPage';
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
+  console.log('🛡️ PROTECTED ROUTE - isAuthenticated:', isAuthenticated, 'loading:', loading);
+
   if (loading) {
+    console.log('⏳ Still loading authentication state');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -18,7 +21,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     );
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  if (isAuthenticated) {
+    console.log('✅ User is authenticated, showing protected content');
+    return <>{children}</>;
+  } else {
+    console.log('❌ User not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
 };
 
 const AppRoutes: React.FC = () => {

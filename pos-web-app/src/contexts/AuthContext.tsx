@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const loginResponse: LoginResponse = await apiClient.login(credentials);
       console.log('✅ Login successful:', loginResponse);
       setUser(loginResponse.user);
+      console.log('✅ User state updated, isAuthenticated should now be:', !!loginResponse.user);
     } catch (error) {
       console.error('❌ Login failed:', error);
       throw error;
@@ -79,6 +80,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isAuthenticated: !!user,
   };
+
+  console.log('🔐 AUTH CONTEXT VALUE:', { 
+    hasUser: !!user, 
+    loading, 
+    isAuthenticated: !!user,
+    username: user?.username 
+  });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

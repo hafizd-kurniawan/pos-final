@@ -212,9 +212,11 @@ class ApiClient {
   // Authentication
   public async login(credentials: LoginRequest): Promise<LoginResponse> {
     console.log('🔐 LOGIN REQUEST');
-    const response = await this.client.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+    const response = await this.client.post<{ data: LoginResponse; message: string }>('/auth/login', credentials);
     
-    if (response.data.success && response.data.data) {
+    console.log('🔍 Login response structure:', response.data);
+    
+    if (response.data.data) {
       this.setAuthToken(response.data.data.token);
       return response.data.data;
     }
@@ -224,9 +226,9 @@ class ApiClient {
 
   public async getProfile(): Promise<User> {
     console.log('👤 GET PROFILE REQUEST');
-    const response = await this.client.get<ApiResponse<User>>('/auth/profile');
+    const response = await this.client.get<{ data: User; message: string }>('/auth/profile');
     
-    if (response.data.success && response.data.data) {
+    if (response.data.data) {
       return response.data.data;
     }
     
@@ -236,9 +238,9 @@ class ApiClient {
   // Dashboard
   public async getDashboardStats(): Promise<DashboardStats> {
     console.log('📊 GET DASHBOARD STATS REQUEST');
-    const response = await this.client.get<ApiResponse<DashboardStats>>('/kasir/dashboard');
+    const response = await this.client.get<{ data: DashboardStats; message: string }>('/kasir/dashboard');
     
-    if (response.data.success && response.data.data) {
+    if (response.data.data) {
       return response.data.data;
     }
     

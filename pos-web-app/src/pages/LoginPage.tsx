@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -11,8 +12,11 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLogging, setIsLogging] = useState(false);
 
+  console.log('🔐 LOGIN PAGE RENDER - isAuthenticated:', isAuthenticated, 'loading:', loading);
+
   // Redirect if already authenticated
   if (isAuthenticated) {
+    console.log('✅ Already authenticated, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -22,10 +26,14 @@ const LoginPage: React.FC = () => {
     setIsLogging(true);
 
     try {
+      console.log('🔐 Starting login process...');
       await login(credentials);
-      // Navigation will be handled by the router after authentication
+      console.log('✅ Login successful, navigating to dashboard...');
+      
+      // Explicit navigation after successful login
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLogging(false);
@@ -132,7 +140,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-6 grid grid-cols-1 gap-3">
               <div className="text-sm text-gray-600 text-center">
                 <p><strong>Username:</strong> kasir1</p>
-                <p><strong>Password:</strong> password123</p>
+                <p><strong>Password:</strong> password</p>
               </div>
             </div>
           </div>
