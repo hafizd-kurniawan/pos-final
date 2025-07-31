@@ -1,0 +1,13 @@
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.mr.flutter.plugin.filepicker
+        pluginClass: FilePickerPlugin
+      ios:
+        pluginClass: FilePickerPlugin
+      macos:
+        pluginClass: FilePickerPlugin
+      web:
+        pluginClass: FilePickerWeb
+        fileName: file_picker_web.dart
