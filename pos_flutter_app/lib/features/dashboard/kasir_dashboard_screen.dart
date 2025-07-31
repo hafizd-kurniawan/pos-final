@@ -9,6 +9,7 @@ import '../../shared/providers/notification_provider.dart';
 import '../../core/widgets/dashboard_layout.dart';
 import '../../core/widgets/stats_card.dart';
 import '../vehicles/vehicle_management_widget.dart';
+import '../customers/customer_management_widget.dart';
 
 class KasirDashboardScreen extends StatefulWidget {
   const KasirDashboardScreen({super.key});
@@ -317,29 +318,7 @@ class _KasirDashboardScreenState extends State<KasirDashboardScreen> {
   }
 
   Widget _buildCustomersContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people,
-            size: 64,
-            color: AppColors.info,
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            'Customer Management',
-            style: AppTextStyles.headlineMedium,
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            'Customer management features will be implemented here',
-            style: AppTextStyles.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    return const CustomerManagementWidget();
   }
 
   Widget _buildPurchasesContent() {
