@@ -50,119 +50,273 @@ class ApiService {
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
-      // Enhanced debug logging to identify URL construction issues
-      print('=== API GET Request Debug (Enhanced) ===');
-      print('Base URL: "$baseUrl"');
-      print('Endpoint: "$endpoint"');
-      print('Query Params: $queryParams');
-      print('Auth Token Present: ${_authToken != null ? "YES" : "NO"}');
+      // Extremely detailed debug logging for browser environment
+      print('==== ULTRA-DETAILED API GET REQUEST DEBUG ====');
+      print('⚡ REQUEST INITIATION:');
+      print('  🌐 Base URL: "$baseUrl"');
+      print('  📍 Endpoint: "$endpoint"');
+      print('  📋 Query Params: $queryParams');
+      print('  🔑 Auth Token Present: ${_authToken != null ? "YES" : "NO"}');
+      if (_authToken != null) {
+        print('  🔐 Token Preview: ${_authToken!.substring(0, 20)}...');
+      }
       
+      // URL Construction Analysis
       var uri = Uri.parse('$baseUrl$endpoint');
-      print('Initial URI: ${uri.toString()}');
+      print('📏 URL CONSTRUCTION ANALYSIS:');
+      print('  🔗 Base + Endpoint URI: ${uri.toString()}');
+      print('  🔍 URI Scheme: ${uri.scheme}');
+      print('  🏠 URI Host: ${uri.host}');
+      print('  🔌 URI Port: ${uri.port}');
+      print('  📂 URI Path: ${uri.path}');
       
       if (queryParams != null && queryParams.isNotEmpty) {
         uri = uri.replace(queryParameters: queryParams.map(
           (key, value) => MapEntry(key, value.toString()),
         ));
-        print('URI with query params: ${uri.toString()}');
+        print('  ➕ With Query Params: ${uri.toString()}');
+        print('  🔍 Query String: ${uri.query}');
       }
       
-      print('Final Request URI: ${uri.toString()}');
-      print('Request Headers: $_headers');
+      print('🎯 FINAL REQUEST URI: ${uri.toString()}');
+      print('📤 REQUEST HEADERS:');
+      _headers.forEach((key, value) {
+        if (key.toLowerCase().contains('authorization')) {
+          print('  $key: ${value.substring(0, 20)}...');
+        } else {
+          print('  $key: $value');
+        }
+      });
       
-      // Test server connectivity first
-      print('Testing server connectivity...');
+      // Browser Environment Detection
+      print('🌍 BROWSER ENVIRONMENT DETECTION:');
+      print('  Platform: Web Browser');
+      print('  User Agent Available: ${_headers.containsKey('User-Agent')}');
+      
+      // Enhanced Connectivity Test
+      print('🔬 ENHANCED CONNECTIVITY DIAGNOSTICS:');
       try {
         final healthUri = Uri.parse('$baseUrl').replace(path: '/health');
-        print('Health check URL: ${healthUri.toString()}');
+        print('  🩺 Health Check URL: ${healthUri.toString()}');
+        print('  ⏱️  Attempting health check with 5s timeout...');
+        
+        final healthStartTime = DateTime.now();
         final healthResponse = await http.get(healthUri).timeout(
           const Duration(seconds: 5),
           onTimeout: () {
             throw TimeoutException('Health check timeout', const Duration(seconds: 5));
           },
         );
-        print('Health check status: ${healthResponse.statusCode}');
-        print('Health check response: ${healthResponse.body}');
+        final healthDuration = DateTime.now().difference(healthStartTime);
+        
+        print('  ✅ Health Check SUCCESS:');
+        print('    📊 Status: ${healthResponse.statusCode}');
+        print('    ⏰ Response Time: ${healthDuration.inMilliseconds}ms');
+        print('    📦 Response Size: ${healthResponse.body.length} bytes');
+        print('    📋 Response Headers: ${healthResponse.headers}');
+        print('    💬 Response Body: ${healthResponse.body}');
+        print('  🟢 Server is reachable and responding');
       } catch (healthError) {
-        print('Health check failed: $healthError');
-        print('Server might not be running or not accessible');
+        print('  ❌ HEALTH CHECK FAILED:');
+        print('    🚨 Error: $healthError');
+        print('    🔍 Error Type: ${healthError.runtimeType}');
+        print('  🔴 This suggests potential connectivity issues');
       }
       
-      print('Proceeding with actual API request...');
+      print('🚀 PROCEEDING WITH MAIN API REQUEST...');
+      print('⏱️  Request timeout: 15 seconds');
+      
+      final requestStartTime = DateTime.now();
+      print('  ⏰ Request initiated at: ${requestStartTime.toIso8601String()}');
+      
       final response = await http.get(uri, headers: _headers).timeout(
         const Duration(seconds: 15),
         onTimeout: () {
+          final timeoutTime = DateTime.now();
+          print('  ⏰ Timeout occurred at: ${timeoutTime.toIso8601String()}');
           throw TimeoutException('Request timeout', const Duration(seconds: 15));
         },
       );
       
-      // Enhanced debug logging
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Headers: ${response.headers}');
-      print('API Response Content-Type: ${response.headers['content-type']}');
-      print('API Response Content-Length: ${response.headers['content-length']}');
-      print('API Response Body: ${response.body.length > 1000 ? '${response.body.substring(0, 1000)}...' : response.body}');
-      print('=== End Enhanced API Debug ===');
+      final responseTime = DateTime.now();
+      final requestDuration = responseTime.difference(requestStartTime);
+      
+      // Ultra-detailed response analysis
+      print('📨 RESPONSE RECEIVED:');
+      print('  ⏰ Response received at: ${responseTime.toIso8601String()}');
+      print('  ⚡ Total request duration: ${requestDuration.inMilliseconds}ms');
+      print('  📊 HTTP Status: ${response.statusCode}');
+      print('  📦 Response Content Length: ${response.contentLength ?? "unknown"} bytes');
+      print('  🗜️ Actual Body Length: ${response.body.length} bytes');
+      
+      print('📋 RESPONSE HEADERS ANALYSIS:');
+      response.headers.forEach((key, value) {
+        print('    $key: $value');
+      });
+      
+      print('📄 RESPONSE BODY PREVIEW:');
+      if (response.body.length > 2000) {
+        print('    ${response.body.substring(0, 2000)}...[TRUNCATED - ${response.body.length} total chars]');
+      } else {
+        print('    ${response.body}');
+      }
+      
+      print('✅ REQUEST COMPLETED SUCCESSFULLY');
+      print('==== END ULTRA-DETAILED DEBUG ====');
       
       return _handleResponse<T>(response, fromJson);
     } on SocketException catch (e) {
-      print('=== API GET Network Error (Enhanced) ===');
-      print('SocketException Details:');
-      print('  Message: ${e.message}');
-      print('  Address: ${e.address}');
-      print('  Port: ${e.port}');
-      print('  OSError: ${e.osError}');
-      print('Troubleshooting:');
-      print('  1. Check if the server is running on $baseUrl');
-      print('  2. Verify network connectivity');
-      print('  3. Check firewall settings');
-      print('  4. Verify the server address and port');
-      print('Endpoint: "$endpoint"');
-      print('Base URL: "$baseUrl"');
-      print('=== End Enhanced Network Error Debug ===');
-      return ApiResponse.error('Network connection failed: Unable to connect to server at $baseUrl. Please verify the server is running and accessible.');
+      print('🚨 === SOCKET EXCEPTION ULTRA-DEBUG ===');
+      print('💥 SocketException caught - Network layer failure');
+      print('📊 Exception Details:');
+      print('  📝 Message: ${e.message}');
+      print('  🌐 Address: ${e.address}');
+      print('  🔌 Port: ${e.port}');
+      print('  💻 OS Error: ${e.osError}');
+      print('  🏷️  Exception Type: ${e.runtimeType}');
+      
+      print('🔍 NETWORK TROUBLESHOOTING ANALYSIS:');
+      print('  🎯 Target: $baseUrl');
+      print('  📍 Endpoint: "$endpoint"');
+      print('  🚨 This typically indicates:');
+      print('    1. 🔴 Server is not running or not accessible');
+      print('    2. 🛡️  Firewall blocking the connection');
+      print('    3. 🌐 Network connectivity issues');
+      print('    4. 🔌 Wrong host/port configuration');
+      print('    5. 🏗️  Server crashed or overloaded');
+      
+      print('🔧 IMMEDIATE ACTIONS TO TRY:');
+      print('  1. ✅ Verify server is running: curl $baseUrl/health');
+      print('  2. 🔍 Check network: ping ${Uri.parse(baseUrl).host}');
+      print('  3. 🔌 Verify port: telnet ${Uri.parse(baseUrl).host} ${Uri.parse(baseUrl).port}');
+      print('  4. 🛡️  Check firewall settings');
+      print('=== END SOCKET EXCEPTION DEBUG ===');
+      
+      return ApiResponse.error('🚨 Network Connection Failed: Cannot connect to $baseUrl. Server may be down or unreachable. Please verify the server is running and network connectivity.');
     } on TimeoutException catch (e) {
-      print('=== API GET Timeout Error (Enhanced) ===');
-      print('TimeoutException Details:');
-      print('  Duration: ${e.duration}');
-      print('  Message: ${e.message}');
-      print('Endpoint: "$endpoint"');
-      print('Base URL: "$baseUrl"');
-      print('Suggestion: Server might be overloaded or slow to respond');
-      print('=== End Enhanced Timeout Error Debug ===');
-      return ApiResponse.error('Request timeout: Server at $baseUrl is taking too long to respond (${e.duration}). Please try again.');
+      print('⏰ === TIMEOUT EXCEPTION ULTRA-DEBUG ===');
+      print('🐌 Request timed out - Server too slow or unresponsive');
+      print('📊 Timeout Details:');
+      print('  ⏱️  Duration: ${e.duration}');
+      print('  📝 Message: ${e.message}');
+      print('  🎯 Target: $baseUrl');
+      print('  📍 Endpoint: "$endpoint"');
+      
+      print('🔍 TIMEOUT ANALYSIS:');
+      print('  🚨 Possible causes:');
+      print('    1. 🐌 Server is overloaded or slow');
+      print('    2. 🌐 Network latency issues');
+      print('    3. 🔄 Server stuck processing request');
+      print('    4. 🛑 Large data transfer taking too long');
+      print('    5. 💾 Database query performance issues');
+      
+      print('🔧 RECOMMENDED ACTIONS:');
+      print('  1. 🔄 Retry the request');
+      print('  2. 📊 Check server performance');
+      print('  3. 🌐 Test network speed');
+      print('  4. 📈 Monitor server logs');
+      print('=== END TIMEOUT EXCEPTION DEBUG ===');
+      
+      return ApiResponse.error('⏰ Request Timeout: Server at $baseUrl took longer than ${e.duration} to respond. This may indicate server performance issues.');
     } on HttpException catch (e) {
-      print('=== API GET HTTP Error (Enhanced) ===');
-      print('HttpException Details:');
-      print('  Message: ${e.message}');
-      print('  URI: ${e.uri}');
-      print('Endpoint: "$endpoint"');
-      print('Base URL: "$baseUrl"');
-      print('=== End Enhanced HTTP Error Debug ===');
-      return ApiResponse.error('HTTP error: ${e.message}');
+      print('📡 === HTTP EXCEPTION ULTRA-DEBUG ===');
+      print('💥 HTTP protocol level exception');
+      print('📊 HTTP Exception Details:');
+      print('  📝 Message: ${e.message}');
+      print('  🔗 URI: ${e.uri}');
+      print('  🎯 Target: $baseUrl');
+      print('  📍 Endpoint: "$endpoint"');
+      
+      print('🔍 HTTP ERROR ANALYSIS:');
+      print('  🚨 This indicates HTTP protocol issues:');
+      print('    1. 🏗️  Server configuration problems');
+      print('    2. 📡 Protocol mismatch (HTTP vs HTTPS)');
+      print('    3. 🔧 Invalid HTTP headers or method');
+      print('    4. 🛡️  Proxy or gateway issues');
+      
+      print('=== END HTTP EXCEPTION DEBUG ===');
+      return ApiResponse.error('📡 HTTP Protocol Error: ${e.message}');
     } on FormatException catch (e) {
-      print('=== API GET Format Error (Enhanced) ===');
-      print('FormatException Details:');
-      print('  Message: ${e.message}');
-      print('  Source: ${e.source}');
-      print('  Offset: ${e.offset}');
-      print('This usually indicates an invalid URL format');
-      print('Base URL: "$baseUrl"');
-      print('Endpoint: "$endpoint"');
-      print('=== End Enhanced Format Error Debug ===');
-      return ApiResponse.error('Invalid URL format: ${e.message}');
+      print('📝 === FORMAT EXCEPTION ULTRA-DEBUG ===');
+      print('💥 URL or data format exception');
+      print('📊 Format Exception Details:');
+      print('  📝 Message: ${e.message}');
+      print('  📄 Source: ${e.source}');
+      print('  📍 Offset: ${e.offset}');
+      print('  🎯 Base URL: "$baseUrl"');
+      print('  📍 Endpoint: "$endpoint"');
+      
+      print('🔍 FORMAT ERROR ANALYSIS:');
+      print('  🚨 This indicates URL construction issues:');
+      print('    1. ❌ Invalid URL format');
+      print('    2. 🔤 Special characters not encoded');
+      print('    3. 📐 Malformed query parameters');
+      print('    4. 🔗 Invalid base URL structure');
+      
+      print('🔧 URL VALIDATION:');
+      try {
+        final testUri = Uri.parse('$baseUrl$endpoint');
+        print('  ✅ Base URL parsing: OK');
+        print('  🔗 Parsed URI: $testUri');
+      } catch (uriError) {
+        print('  ❌ Base URL parsing failed: $uriError');
+      }
+      
+      print('=== END FORMAT EXCEPTION DEBUG ===');
+      return ApiResponse.error('📝 Invalid URL Format: ${e.message}. Check URL construction.');
     } catch (e, stackTrace) {
-      print('=== API GET Unexpected Error (Enhanced) ===');
-      print('Error Type: ${e.runtimeType}');
-      print('Error Details: $e');
-      print('Stack Trace:');
-      print('$stackTrace');
-      print('Request Details:');
-      print('  Endpoint: "$endpoint"');
-      print('  Base URL: "$baseUrl"');
-      print('  Full URI: ${Uri.parse('$baseUrl$endpoint')}');
-      print('=== End Enhanced Unexpected Error Debug ===');
-      return ApiResponse.error('Unexpected error: $e');
+      print('💥 === UNEXPECTED EXCEPTION ULTRA-DEBUG ===');
+      print('🚨 Caught unexpected exception type: ${e.runtimeType}');
+      print('📊 Exception Details:');
+      print('  📝 Error: $e');
+      print('  🏷️  Type: ${e.runtimeType}');
+      
+      print('📍 Request Context:');
+      print('  🎯 Base URL: "$baseUrl"');
+      print('  📍 Endpoint: "$endpoint"');
+      print('  🔗 Full URI: ${Uri.parse('$baseUrl$endpoint')}');
+      print('  🔑 Has Auth: ${_authToken != null}');
+      
+      // Browser-specific error analysis
+      print('🌍 BROWSER-SPECIFIC ERROR ANALYSIS:');
+      if (e.toString().contains('ClientException')) {
+        print('  🚨 DETECTED: ClientException - Browser security restriction');
+        print('  💡 Common causes in browser environment:');
+        print('    1. 🛡️  CORS (Cross-Origin Resource Sharing) blocked');
+        print('    2. 🔒 Mixed content (HTTPS page calling HTTP API)');
+        print('    3. 🚫 Browser security policy violation');
+        print('    4. 🌐 Network connectivity lost');
+        print('    5. 🔧 Invalid request configuration');
+        
+        print('  🔧 BROWSER-SPECIFIC TROUBLESHOOTING:');
+        print('    1. 🔍 Check browser DevTools Console for CORS errors');
+        print('    2. 🔍 Check browser DevTools Network tab');
+        print('    3. 🛡️  Verify server CORS configuration');
+        print('    4. 🔒 Ensure HTTPS/HTTP protocol match');
+        print('    5. 🚫 Check for browser extensions blocking requests');
+      }
+      
+      if (e.toString().contains('Failed to fetch')) {
+        print('  🚨 DETECTED: "Failed to fetch" - Classic browser network error');
+        print('  💡 Typical reasons:');
+        print('    1. 🌐 Network disconnected or unstable');
+        print('    2. 🛡️  CORS preflight request failed');
+        print('    3. 🔒 SSL/TLS certificate issues');
+        print('    4. 🚫 Request blocked by browser/extension');
+        print('    5. 🏗️  Server not responding to OPTIONS request');
+      }
+      
+      print('📚 COMPLETE STACK TRACE:');
+      final stackLines = stackTrace.toString().split('\n');
+      for (int i = 0; i < stackLines.length && i < 20; i++) {
+        print('  ${i.toString().padLeft(2)}: ${stackLines[i]}');
+      }
+      if (stackLines.length > 20) {
+        print('  ... [${stackLines.length - 20} more lines]');
+      }
+      
+      print('=== END UNEXPECTED EXCEPTION DEBUG ===');
+      return ApiResponse.error('💥 Unexpected Browser Error: $e');
     }
   }
   

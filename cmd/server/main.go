@@ -70,7 +70,7 @@ func main() {
 	router := gin.New()
 
 	// Add middlewares
-	router.Use(middleware.Logger())
+	router.Use(middleware.UltraLogger())  // Use ultra-detailed logging
 	router.Use(middleware.Recovery())
 	router.Use(middleware.CORS())
 
