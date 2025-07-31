@@ -49,27 +49,41 @@ class ApiService {
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
+      // Enhanced debug logging to identify URL construction issues
+      print('=== API GET Request Debug ===');
+      print('Base URL: "$baseUrl"');
+      print('Endpoint: "$endpoint"');
+      print('Query Params: $queryParams');
+      
       var uri = Uri.parse('$baseUrl$endpoint');
+      print('Initial URI: ${uri.toString()}');
+      
       if (queryParams != null && queryParams.isNotEmpty) {
         uri = uri.replace(queryParameters: queryParams.map(
           (key, value) => MapEntry(key, value.toString()),
         ));
+        print('URI with query params: ${uri.toString()}');
       }
       
-      // Debug logging
-      print('API GET Request: ${uri.toString()}');
+      print('Final Request URI: ${uri.toString()}');
+      print('Request Headers: $_headers');
       
       final response = await http.get(uri, headers: _headers);
       
       // Debug logging
       print('API Response Status: ${response.statusCode}');
-      print('API Response Body: ${response.body}');
+      print('API Response Body: ${response.body.length > 500 ? '${response.body.substring(0, 500)}...' : response.body}');
+      print('=== End API Debug ===');
       
       return _handleResponse<T>(response, fromJson);
-    } catch (e) {
-      print('API GET Error: $e');
-      print('Endpoint: $endpoint');
-      print('Base URL: $baseUrl');
+    } catch (e, stackTrace) {
+      print('=== API GET Error Debug ===');
+      print('Error Type: ${e.runtimeType}');
+      print('Error: $e');
+      print('Stack Trace: $stackTrace');
+      print('Endpoint: "$endpoint"');
+      print('Base URL: "$baseUrl"');
+      print('=== End Error Debug ===');
       return ApiResponse.error('Network error: $e');
     }
   }
@@ -81,14 +95,30 @@ class ApiService {
     T Function(Map<String, dynamic>)? fromJson,
   }) async {
     try {
+      print('=== API POST Request Debug ===');
+      print('Base URL: "$baseUrl"');
+      print('Endpoint: "$endpoint"');
+      
       final uri = Uri.parse('$baseUrl$endpoint');
+      print('Request URI: ${uri.toString()}');
+      print('Request Body: ${body != null ? json.encode(body) : 'null'}');
+      
       final response = await http.post(
         uri,
         headers: _headers,
         body: body != null ? json.encode(body) : null,
       );
+      
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${response.body.length > 500 ? '${response.body.substring(0, 500)}...' : response.body}');
+      print('=== End POST Debug ===');
+      
       return _handleResponse<T>(response, fromJson);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('=== API POST Error Debug ===');
+      print('Error: $e');
+      print('Stack Trace: $stackTrace');
+      print('=== End POST Error Debug ===');
       return ApiResponse.error('Network error: $e');
     }
   }

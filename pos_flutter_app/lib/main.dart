@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/config/app_config.dart';
+import 'core/config/app_environment.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/api_service.dart';
 import 'core/services/auth_service.dart';
@@ -24,9 +25,16 @@ void main() async {
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   
-  // Initialize services
+  // Debug logging for environment
+  print('=== POS Flutter App Initialization ===');
+  print('Environment: ${AppEnvironment.environment}');
+  print('API Base URL: ${AppEnvironment.apiBaseUrl}');
+  print('Debug Logs Enabled: ${AppEnvironment.enableDebugLogs}');
+  print('======================================');
+  
+  // Initialize services with environment-based configuration
   final storageService = StorageService(prefs);
-  final apiService = ApiService(baseUrl: AppConstants.apiBaseUrl);
+  final apiService = ApiService(baseUrl: AppEnvironment.apiBaseUrl);
   final authService = AuthService(apiService, storageService);
   
   runApp(
