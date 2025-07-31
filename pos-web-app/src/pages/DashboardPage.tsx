@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Layout from '../components/Layout';
 import apiClient, { DashboardStats, SalesInvoice } from '../services/api';
 import { 
   Car, 
@@ -10,9 +11,9 @@ import {
   Plus, 
   Users, 
   BarChart3,
-  CalendarDays,
-  CreditCard
+  CalendarDays
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface StatCardProps {
   title: string;
@@ -64,7 +65,8 @@ const ActionCard: React.FC<ActionCardProps> = ({ title, icon, onClick }) => (
 );
 
 const DashboardPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSales, setRecentSales] = useState<SalesInvoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,15 +79,28 @@ const DashboardPage: React.FC = () => {
       setError('');
 
       try {
-        // Fetch dashboard stats
+        // Fetch dashboard stats based on user role
         console.log('📈 Getting dashboard stats...');
-        const dashboardStats = await apiClient.getDashboardStats();
+        let dashboardStats: DashboardStats;
+        
+        if (user?.role === 'admin') {
+          dashboardStats = await apiClient.getDashboardStats();
+        } else if (user?.role === 'kasir') {
+          dashboardStats = await apiClient.getKasirDashboard();
+        } else if (user?.role === 'mekanik') {
+          dashboardStats = await apiClient.getMekanikDashboard();
+        } else {
+          dashboardStats = await apiClient.getKasirDashboard();
+        }
+        
         setStats(dashboardStats);
 
-        // Fetch recent sales
-        console.log('💰 Getting recent sales...');
-        const salesResponse = await apiClient.getSales(1, 5);
-        setRecentSales(salesResponse.data);
+        // Fetch recent sales if user has permission
+        if (user?.role === 'admin' || user?.role === 'kasir') {
+          console.log('💰 Getting recent sales...');
+          const salesResponse = await apiClient.getSales(1, 5);
+          setRecentSales(salesResponse.data);
+        }
 
         console.log('✅ Dashboard data loaded successfully');
       } catch (err: any) {
@@ -97,179 +112,208 @@ const DashboardPage: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [user?.role]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const getQuickActions = () => {
+    const actions = [
+      { title: 'View Reports', icon: <BarChart3 size={24} className="text-gray-600" />, onClick: () => navigate('/reports') },
+    ];
+
+    if (user?.role === 'admin' || user?.role === 'kasir') {
+      actions.unshift(
+        { title: 'Create Sale', icon: <ShoppingCart size={24} className="text-gray-600" />, onClick: () => navigate('/sales') },
+        { title: 'Add Vehicle', icon: <Plus size={24} className="text-gray-600" />, onClick: () => navigate('/vehicles') },
+        { title: 'New Customer', icon: <Users size={24} className="text-gray-600" />, onClick: () => navigate('/customers') }
+      );
+    }
+
+    if (user?.role === 'mekanik') {
+      actions.unshift(
+        { title: 'Work Orders', icon: <Wrench size={24} className="text-gray-600" />, onClick: () => navigate('/work-orders') },
+        { title: 'Spare Parts', icon: <Plus size={24} className="text-gray-600" />, onClick: () => navigate('/spare-parts') }
+      );
+    }
+
+    return actions;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="text-red-800">
+            <strong>Network Error</strong>
+            <p className="mt-2">{error}</p>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">POS System</h1>
-              <p className="text-sm text-gray-600">Vehicle Sales & Service Management</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.name || user?.username}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
-              </div>
-              <button
-                onClick={logout}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Layout>
+      <div className="space-y-6">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg">
           <div className="px-6 py-8 text-white">
-            <h2 className="text-2xl font-bold">Welcome back, {user?.name || user?.username}!</h2>
+            <h1 className="text-2xl font-bold">Welcome back, {user?.name || user?.username}!</h1>
             <p className="mt-2 text-blue-100">Ready to manage vehicle sales and customer transactions</p>
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-4 mb-6">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
-
         {/* Quick Overview */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Overview</h3>
+        <div>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
               title="Available Vehicles"
               value={stats?.availableVehicles || 0}
               subtitle="Ready for sale"
-              icon={<Car className="h-6 w-6 text-white" />}
+              icon={<Car size={24} className="text-white" />}
               color="bg-green-500"
             />
             <StatCard
               title="Today's Sales"
               value={stats?.todaySales || 0}
               subtitle="Transactions"
-              icon={<TrendingUp className="h-6 w-6 text-white" />}
+              icon={<TrendingUp size={24} className="text-white" />}
               color="bg-blue-500"
             />
             <StatCard
               title="Pending Repairs"
               value={stats?.pendingRepairs || 0}
               subtitle="In workshop"
-              icon={<Wrench className="h-6 w-6 text-white" />}
+              icon={<Wrench size={24} className="text-white" />}
               color="bg-orange-500"
             />
             <StatCard
               title="Total Revenue"
               value={formatCurrency(stats?.totalRevenue || 0)}
               subtitle="This month"
-              icon={<DollarSign className="h-6 w-6 text-white" />}
+              icon={<DollarSign size={24} className="text-white" />}
               color="bg-purple-500"
             />
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ActionCard
-              title="Create Sale"
-              icon={<ShoppingCart className="h-6 w-6 text-gray-600" />}
-              onClick={() => console.log('Navigate to create sale')}
-            />
-            <ActionCard
-              title="Add Vehicle"
-              icon={<Plus className="h-6 w-6 text-gray-600" />}
-              onClick={() => console.log('Navigate to add vehicle')}
-            />
-            <ActionCard
-              title="New Customer"
-              icon={<Users className="h-6 w-6 text-gray-600" />}
-              onClick={() => console.log('Navigate to add customer')}
-            />
-            <ActionCard
-              title="View Reports"
-              icon={<BarChart3 className="h-6 w-6 text-gray-600" />}
-              onClick={() => console.log('Navigate to reports')}
-            />
+            {getQuickActions().map((action, index) => (
+              <ActionCard
+                key={index}
+                title={action.title}
+                icon={action.icon}
+                onClick={action.onClick}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Sales Management Preview */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Sales Management Preview</h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-              View All Sales →
-            </button>
-          </div>
-          
-          {recentSales.length > 0 ? (
-            <div className="bg-white shadow-lg rounded-lg border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-medium text-gray-900">SAL-20240301-001</h4>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {formatCurrency(120000000)}
-                  </span>
+        {/* Sales Management Preview - Only for admin and kasir */}
+        {(user?.role === 'admin' || user?.role === 'kasir') && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">Sales Management Preview</h2>
+              <button
+                onClick={() => navigate('/sales')}
+                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+              >
+                View All Sales →
+              </button>
+            </div>
+            
+            {recentSales.length > 0 ? (
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">Recent Sales</h3>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">Customer: Budi Santoso</p>
+                <div className="divide-y divide-gray-200">
+                  {recentSales.map((sale) => (
+                    <div key={sale.id} className="px-6 py-4 hover:bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex-shrink-0">
+                              <Car className="h-10 w-10 text-blue-500 bg-blue-100 rounded-full p-2" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {sale.invoiceNumber}
+                              </p>
+                              <p className="text-sm text-gray-500 truncate">
+                                Customer: {sale.customer?.name}
+                              </p>
+                              <p className="text-sm text-gray-500 truncate">
+                                {sale.vehicle?.brand} {sale.vehicle?.model} ({sale.vehicle?.year})
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">
+                              {formatCurrency(sale.sellPrice)}
+                            </p>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              sale.paymentStatus === 'paid' 
+                                ? 'bg-green-100 text-green-800'
+                                : sale.paymentStatus === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {sale.paymentStatus.toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            <CalendarDays className="inline w-4 h-4 mr-1" />
+                            {new Date(sale.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              
-              <div className="px-6 py-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <CalendarDays className="h-4 w-4 mr-2" />
-                  <span className="mr-4">1 Mar 2024</span>
-                  <Car className="h-4 w-4 mr-2" />
-                  <span>Daihatsu Ayla (2024)</span>
-                </div>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    <CreditCard className="h-3 w-3 mr-1" />
-                    TRANSFER
-                  </span>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    TRANSFER
+            ) : (
+              <div className="bg-white shadow-lg rounded-lg p-8 text-center">
+                <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No recent sales to display</h3>
+                <p className="mt-1 text-sm text-gray-500">Start by creating your first sale.</p>
+                <div className="mt-6">
+                  <button
+                    onClick={() => navigate('/sales')}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="-ml-1 mr-2 h-5 w-5" />
+                    Create Sale
                   </button>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white shadow-lg rounded-lg border border-gray-200 p-8 text-center">
-              <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No recent sales to display</p>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 
