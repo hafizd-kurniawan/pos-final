@@ -49,6 +49,7 @@ func main() {
 	salesService := service.NewSalesService(salesRepo, vehicleRepo)
 	workOrderService := service.NewWorkOrderService(workOrderRepo, vehicleRepo, sparePartRepo, workOrderPartRepo, userRepo)
 	invoiceService := service.NewInvoiceService(salesService, purchaseService, workOrderService)
+	reportService := service.NewReportService(salesRepo, purchaseRepo, workOrderRepo, vehicleRepo, sparePartRepo, customerRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -63,6 +64,7 @@ func main() {
 	workOrderHandler := handler.NewWorkOrderHandler(workOrderService)
 	pdfHandler := handler.NewPDFHandler(invoiceService)
 	notificationHandler := handler.NewNotificationHandler(notificationService)
+	reportHandler := handler.NewReportHandler(reportService)
 
 	// Initialize Gin router
 	router := gin.New()
@@ -73,7 +75,7 @@ func main() {
 	router.Use(middleware.CORS())
 
 	// Setup routes
-	setupRoutes(router, authHandler, adminHandler, fileHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, pdfHandler, notificationHandler, cfg)
+	setupRoutes(router, authHandler, adminHandler, fileHandler, customerHandler, vehicleHandler, sparePartHandler, dashboardHandler, purchaseHandler, salesHandler, workOrderHandler, pdfHandler, notificationHandler, reportHandler, cfg)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -98,6 +100,7 @@ func setupRoutes(
 	workOrderHandler *handler.WorkOrderHandler,
 	pdfHandler *handler.PDFHandler,
 	notificationHandler *handler.NotificationHandler,
+	reportHandler *handler.ReportHandler,
 	cfg *config.Config,
 ) {
 	// Health check
@@ -280,6 +283,20 @@ func setupRoutes(
 			notifications.PUT("/:id/read", notificationHandler.MarkAsRead)
 			notifications.PUT("/read-all", notificationHandler.MarkAllAsRead)
 			notifications.DELETE("/:id", notificationHandler.DeleteNotification)
+		}
+
+		// Advanced reporting routes (admin + kasir)
+		reports := protected.Group("/reports")
+		reports.Use(middleware.RequireAdminOrKasir())
+		{
+			reports.GET("/sales", reportHandler.GetSalesReport)
+			reports.GET("/purchases", reportHandler.GetPurchaseReport)
+			reports.GET("/inventory", reportHandler.GetInventoryReport)
+			reports.GET("/profit-loss", reportHandler.GetProfitLossReport)
+			reports.GET("/vehicles", reportHandler.GetVehicleReport)
+			reports.GET("/work-orders", reportHandler.GetWorkOrderReport)
+			reports.GET("/daily", reportHandler.GetDailyReport)
+			reports.GET("/overview", reportHandler.GetBusinessOverview)
 		}
 	}
 }

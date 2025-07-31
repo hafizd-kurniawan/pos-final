@@ -220,6 +220,61 @@ func (r *workOrderRepository) SoftDelete(ctx context.Context, id int, deletedBy 
 	return nil
 }
 
+func (r *workOrderRepository) ListByDateRange(ctx context.Context, startDate, endDate time.Time, offset, limit int) ([]*domain.WorkOrder, error) {
+	query := `
+		SELECT wo.id, wo.wo_number, wo.vehicle_id, wo.description, wo.assigned_mechanic_id, 
+		       wo.status, wo.progress_percentage, wo.total_parts_cost, wo.labor_cost, 
+		       wo.total_cost, wo.notes, wo.created_by, wo.started_at, wo.completed_at, 
+		       wo.created_at, wo.updated_at,
+		       v.id, v.vehicle_code, v.brand, v.model, v.year, v.plate_number,
+		       u.id, u.username, u.email,
+		       c.id, c.username, c.email
+		FROM work_orders wo
+		LEFT JOIN vehicles v ON wo.vehicle_id = v.id
+		LEFT JOIN users u ON wo.assigned_mechanic_id = u.id  
+		LEFT JOIN users c ON wo.created_by = c.id
+		WHERE wo.deleted_at IS NULL 
+		  AND wo.created_at >= $1 
+		  AND wo.created_at <= $2
+		ORDER BY wo.created_at DESC
+		LIMIT $3 OFFSET $4
+	`
+	
+	rows, err := r.db.QueryContext(ctx, query, startDate, endDate, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list work orders by date range: %w", err)
+	}
+	defer rows.Close()
+	
+	var workOrders []*domain.WorkOrder
+	for rows.Next() {
+		var wo domain.WorkOrder
+		var vehicle domain.Vehicle
+		var mechanic domain.User
+		var creator domain.User
+		
+		err := rows.Scan(
+			&wo.ID, &wo.WONumber, &wo.VehicleID, &wo.Description, &wo.AssignedMechanicID,
+			&wo.Status, &wo.ProgressPercentage, &wo.TotalPartsCost, &wo.LaborCost,
+			&wo.TotalCost, &wo.Notes, &wo.CreatedBy, &wo.StartedAt, &wo.CompletedAt,
+			&wo.CreatedAt, &wo.UpdatedAt,
+			&vehicle.ID, &vehicle.VehicleCode, &vehicle.Brand, &vehicle.Model, &vehicle.Year, &vehicle.PlateNumber,
+			&mechanic.ID, &mechanic.Username, &mechanic.Email,
+			&creator.ID, &creator.Username, &creator.Email,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan work order: %w", err)
+		}
+		
+		wo.Vehicle = &vehicle
+		wo.AssignedMechanic = &mechanic
+		wo.Creator = &creator
+		workOrders = append(workOrders, &wo)
+	}
+	
+	return workOrders, nil
+}
+
 func (r *workOrderRepository) Count(ctx context.Context) (int, error) {
 	var count int
 	query := `SELECT COUNT(*) FROM work_orders WHERE deleted_at IS NULL`

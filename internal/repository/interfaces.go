@@ -121,6 +121,7 @@ type WorkOrderRepository interface {
 	List(ctx context.Context, offset, limit int) ([]*domain.WorkOrder, error)
 	ListByStatus(ctx context.Context, status domain.WorkOrderStatus, offset, limit int) ([]*domain.WorkOrder, error)
 	ListByMechanic(ctx context.Context, mechanicID int, offset, limit int) ([]*domain.WorkOrder, error)
+	ListByDateRange(ctx context.Context, startDate, endDate time.Time, offset, limit int) ([]*domain.WorkOrder, error)
 	Update(ctx context.Context, workOrder *domain.WorkOrder) error
 	SoftDelete(ctx context.Context, id int, deletedBy int) error
 	Count(ctx context.Context) (int, error)
