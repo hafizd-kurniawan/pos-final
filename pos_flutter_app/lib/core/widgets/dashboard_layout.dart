@@ -126,8 +126,14 @@ class DashboardLayout extends StatelessWidget {
             ),
           ),
 
-          // User Section
-          _buildUserSection(context),
+          // User Section - with minimum height constraint
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 100,
+              maxHeight: 140,
+            ),
+            child: _buildUserSection(context),
+          ),
         ],
       ),
     );
@@ -202,7 +208,7 @@ class DashboardLayout extends StatelessWidget {
 
   Widget _buildUserSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(color: AppColors.border),
@@ -214,41 +220,46 @@ class DashboardLayout extends StatelessWidget {
           if (user == null) return const SizedBox.shrink();
 
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // User Info
               Row(
                 children: [
                   CircleAvatar(
+                    radius: 16,
                     backgroundColor: AppColors.primary,
                     child: Text(
                       user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : 'U',
-                      style: AppTextStyles.labelLarge.copyWith(
+                      style: AppTextStyles.labelMedium.copyWith(
                         color: AppColors.white,
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           user.fullName,
-                          style: AppTextStyles.labelLarge,
+                          style: AppTextStyles.labelMedium,
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         Text(
                           user.role.toUpperCase(),
-                          style: AppTextStyles.bodySmall.copyWith(
+                          style: AppTextStyles.labelSmall.copyWith(
                             color: AppColors.textTertiary,
                           ),
+                          maxLines: 1,
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
 
               // Logout Button
               SizedBox(
@@ -260,11 +271,16 @@ class DashboardLayout extends StatelessWidget {
                       context.go('/login');
                     }
                   },
-                  icon: const Icon(Icons.logout, size: 18),
+                  icon: const Icon(Icons.logout, size: 16),
                   label: const Text('Logout'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
                     side: const BorderSide(color: AppColors.error),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    minimumSize: const Size(double.infinity, 32),
                   ),
                 ),
               ),
