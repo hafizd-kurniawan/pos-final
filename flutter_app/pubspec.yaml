@@ -33,11 +33,11 @@ dependencies:
   image_picker: ^1.0.4
   cached_network_image: ^3.3.0
   
+  # Web-compatible file handling
+  image_picker_for_web: ^3.0.0
+  
   # Utilities
   intl: ^0.18.1
-
-  # File Picker - Added only when needed for web
-  # file_picker: ^5.5.0
 
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,7 @@
 /android/app/build/
 /ios/Runner.app/
 /windows/runner/
+/web/
 
 # IDE files
 .vscode/
@@ -20,8 +21,13 @@ Thumbs.db
 .pub-cache/
 .flutter-plugins
 .flutter-plugins-dependencies
+pubspec.lock
 
 # Temporary files
 *.tmp
 *.temp
 *.log
+
+# Web build artifacts
+/web/build/
+/web/.dart_tool/
