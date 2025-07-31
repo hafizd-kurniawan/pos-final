@@ -9,6 +9,7 @@ import 'auth/login_screen.dart';
 import 'dashboard/kasir_dashboard_screen.dart';
 import 'dashboard/mechanic_dashboard_screen.dart';
 import 'dashboard/admin_dashboard_screen.dart';
+import 'sales/sales_list_screen.dart';
 
 class POSApp extends StatefulWidget {
   const POSApp({super.key});
@@ -72,6 +73,10 @@ class _POSAppState extends State<POSApp> {
         GoRoute(
           path: '/admin-dashboard',
           builder: (context, state) => const AdminDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/sales',
+          builder: (context, state) => const SalesListScreen(),
         ),
       ],
     );

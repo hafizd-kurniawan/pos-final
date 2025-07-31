@@ -10,6 +10,7 @@ import '../../core/widgets/dashboard_layout.dart';
 import '../../core/widgets/stats_card.dart';
 import '../vehicles/vehicle_management_widget.dart';
 import '../customers/customer_management_widget.dart';
+import '../sales/sales_management_widget.dart';
 
 class KasirDashboardScreen extends StatefulWidget {
   const KasirDashboardScreen({super.key});
@@ -288,29 +289,7 @@ class _KasirDashboardScreenState extends State<KasirDashboardScreen> {
   }
 
   Widget _buildSalesContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.point_of_sale,
-            size: 64,
-            color: AppColors.primary,
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            'Sales Management',
-            style: AppTextStyles.headlineMedium,
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            'Sales management features will be implemented here',
-            style: AppTextStyles.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    return const SalesManagementWidget();
   }
 
   Widget _buildVehiclesContent() {

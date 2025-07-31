@@ -5,6 +5,7 @@ import '../../core/constants/app_theme.dart';
 import '../../shared/providers/auth_provider.dart';
 import '../../core/widgets/dashboard_layout.dart';
 import '../../core/widgets/stats_card.dart';
+import '../sales/sales_management_widget.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -38,6 +39,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           icon: Icons.people,
         ),
         DashboardMenuItem(
+          id: 'sales',
+          label: 'Sales Management',
+          icon: Icons.point_of_sale,
+        ),
+        DashboardMenuItem(
           id: 'vehicles',
           label: 'Vehicle Overview',
           icon: Icons.directions_car,
@@ -68,6 +74,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         return _buildDashboardContent();
       case 'users':
         return _buildUsersContent();
+      case 'sales':
+        return _buildSalesContent();
       case 'vehicles':
         return _buildVehiclesContent();
       case 'work_orders':
@@ -365,5 +373,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildSalesContent() {
+    return const SalesManagementWidget();
   }
 }

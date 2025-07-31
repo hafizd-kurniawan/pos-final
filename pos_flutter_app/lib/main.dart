@@ -11,6 +11,7 @@ import 'core/services/storage_service.dart';
 import 'shared/providers/auth_provider.dart';
 import 'shared/providers/vehicle_provider.dart';
 import 'shared/providers/customer_provider.dart';
+import 'shared/providers/sales_provider.dart';
 import 'shared/providers/notification_provider.dart';
 import 'features/app.dart';
 
@@ -34,6 +35,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
         ChangeNotifierProvider(create: (_) => VehicleProvider(apiService)),
         ChangeNotifierProvider(create: (_) => CustomerProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => SalesProvider(apiService)),
         ChangeNotifierProvider(create: (_) => NotificationProvider(apiService)),
       ],
       child: const POSApp(),

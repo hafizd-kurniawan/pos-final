@@ -1,6 +1,7 @@
 // API Configuration
 class AppConstants {
   // API Base URL - Update this to match your Go API server
+  // For web development, you might need to use full URL with proper CORS setup
   static const String apiBaseUrl = 'http://localhost:8080/api/v1';
   
   // File upload endpoints

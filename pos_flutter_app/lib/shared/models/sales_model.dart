@@ -94,6 +94,5 @@ class CreateSalesRequest {
   }
 }
 
-// Import statements that would be needed
 import 'customer_model.dart';
 import 'vehicle_model.dart';

@@ -56,9 +56,20 @@ class ApiService {
         ));
       }
       
+      // Debug logging
+      print('API GET Request: ${uri.toString()}');
+      
       final response = await http.get(uri, headers: _headers);
+      
+      // Debug logging
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
+      
       return _handleResponse<T>(response, fromJson);
     } catch (e) {
+      print('API GET Error: $e');
+      print('Endpoint: $endpoint');
+      print('Base URL: $baseUrl');
       return ApiResponse.error('Network error: $e');
     }
   }
