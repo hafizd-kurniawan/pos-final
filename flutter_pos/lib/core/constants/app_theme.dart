@@ -77,7 +77,7 @@ class AppTheme {
       ),
       
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 2,
         shadowColor: AppColors.shadow,
@@ -248,7 +248,7 @@ class AppTheme {
       ),
       
       // Drawer Theme
-      drawerTheme: const DrawerTheme(
+      drawerTheme: const DrawerThemeData(
         backgroundColor: AppColors.surface,
         elevation: 4,
         shadowColor: AppColors.shadow,

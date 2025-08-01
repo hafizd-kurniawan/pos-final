@@ -54,7 +54,7 @@ class PosApp extends StatelessWidget {
       initialLocation: '/login',
       redirect: (context, state) {
         final isLoggedIn = authProvider.isAuthenticated;
-        final isLoggingIn = state.subloc == '/login';
+        final isLoggingIn = state.matchedLocation == '/login';
 
         // If not logged in and not on login page, redirect to login
         if (!isLoggedIn && !isLoggingIn) {
