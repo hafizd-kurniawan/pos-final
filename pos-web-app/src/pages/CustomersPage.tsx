@@ -15,9 +15,10 @@ const CustomersPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.getCustomers(1, 100);
-      setCustomers(response.data);
+      setCustomers(response.data || []);
     } catch (err: any) {
       setError(err.message);
+      setCustomers([]); // Ensure customers is always an array
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ const CustomersPage: React.FC = () => {
     }
   };
 
-  const filteredCustomers = customers.filter(customer =>
+  const filteredCustomers = (customers || []).filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase())

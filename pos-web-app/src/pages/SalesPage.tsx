@@ -17,11 +17,12 @@ const SalesPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.getSales(page, 10);
-      setSales(response.data);
-      setTotalPages(response.pagination.totalPages);
+      setSales(response.data || []);
+      setTotalPages(response.pagination?.totalPages || 1);
       setCurrentPage(page);
     } catch (err: any) {
       setError(err.message);
+      setSales([]); // Ensure sales is always an array
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ const SalesPage: React.FC = () => {
     }).format(amount);
   };
 
-  const filteredSales = sales.filter(sale =>
+  const filteredSales = (sales || []).filter(sale =>
     sale.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sale.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sale.vehicle?.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())

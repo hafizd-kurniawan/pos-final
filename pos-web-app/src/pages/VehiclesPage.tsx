@@ -18,11 +18,12 @@ const VehiclesPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiClient.getVehicles(page, 10, status);
-      setVehicles(response.data);
-      setTotalPages(response.pagination.totalPages);
+      setVehicles(response.data || []);
+      setTotalPages(response.pagination?.totalPages || 1);
       setCurrentPage(page);
     } catch (err: any) {
       setError(err.message);
+      setVehicles([]); // Ensure vehicles is always an array
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ const VehiclesPage: React.FC = () => {
     }).format(amount);
   };
 
-  const filteredVehicles = vehicles.filter(vehicle =>
+  const filteredVehicles = (vehicles || []).filter(vehicle =>
     vehicle.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vehicle.model.toLowerCase().includes(searchTerm.toLowerCase())
