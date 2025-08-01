@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"log"
 	"pos-final/internal/domain"
 	"time"
 
@@ -96,6 +97,9 @@ func (r *salesInvoiceRepository) GetByInvoiceNumber(ctx context.Context, invoice
 }
 
 func (r *salesInvoiceRepository) List(ctx context.Context, offset, limit int) ([]*domain.SalesInvoice, error) {
+	log.Printf("=== Sales Repository: List ===")
+	log.Printf("Parameters: offset=%d, limit=%d", offset, limit)
+	
 	var invoices []*domain.SalesInvoice
 	query := `
 		SELECT si.id, si.invoice_number, si.customer_id, si.vehicle_id, si.selling_price,
@@ -118,11 +122,25 @@ func (r *salesInvoiceRepository) List(ctx context.Context, offset, limit int) ([
 		LIMIT $1 OFFSET $2
 	`
 	
+	log.Printf("Executing SQL query:")
+	log.Printf("Query: %s", query)
+	log.Printf("Parameters: limit=%d, offset=%d", limit, offset)
+	
 	err := r.db.SelectContext(ctx, &invoices, query, limit, offset)
 	if err != nil {
+		log.Printf("ERROR: SQL query failed: %v", err)
 		return nil, fmt.Errorf("failed to list sales invoices: %w", err)
 	}
 	
+	log.Printf("SQL query successful: retrieved %d records", len(invoices))
+	
+	if len(invoices) > 0 {
+		log.Printf("Sample result - First invoice: ID=%d, Number=%s", invoices[0].ID, invoices[0].InvoiceNumber)
+	} else {
+		log.Printf("No sales invoices found in database")
+	}
+	
+	log.Printf("=== End Sales Repository: List ===")
 	return invoices, nil
 }
 
@@ -213,13 +231,21 @@ func (r *salesInvoiceRepository) SoftDelete(ctx context.Context, id int, deleted
 }
 
 func (r *salesInvoiceRepository) Count(ctx context.Context) (int, error) {
+	log.Printf("=== Sales Repository: Count ===")
+	
 	var count int
 	query := `SELECT COUNT(*) FROM sales_invoices WHERE deleted_at IS NULL`
 	
+	log.Printf("Executing count query: %s", query)
+	
 	err := r.db.QueryRowContext(ctx, query).Scan(&count)
 	if err != nil {
+		log.Printf("ERROR: Count query failed: %v", err)
 		return 0, fmt.Errorf("failed to count sales invoices: %w", err)
 	}
+	
+	log.Printf("Count query successful: found %d total sales invoices", count)
+	log.Printf("=== End Sales Repository: Count ===")
 	
 	return count, nil
 }
