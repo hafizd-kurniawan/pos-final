@@ -4,7 +4,7 @@
 
 # Variables
 BINARY_NAME=pos-server
-DOCKER_COMPOSE=docker-compose
+DOCKER_COMPOSE=docker compose
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'

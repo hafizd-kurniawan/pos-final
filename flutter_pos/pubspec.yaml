@@ -1,0 +1,71 @@
+name: flutter_pos
+description: A comprehensive Point of Sale (POS) system for vehicle sales, repairs, and spare parts management.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # HTTP & API
+  http: ^1.1.2
+  dio: ^5.4.0
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+  
+  # Image & Media
+  image_picker: ^1.0.5
+  cached_network_image: ^3.3.0
+  
+  # PDF & Documents
+  pdf: ^3.10.7
+  printing: ^5.11.1
+  path_provider: ^2.1.1
+  
+  # Navigation
+  go_router: ^12.1.3
+  
+  # UI Components
+  flutter_svg: ^2.0.9
+  intl: ^0.19.0
+  
+  # Barcode
+  qr_code_scanner: ^1.0.1
+  
+  # Notifications
+  flutter_local_notifications: ^16.3.2
+  
+  # Utils
+  uuid: ^4.2.1
+  file_picker: ^6.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
