@@ -207,7 +207,7 @@ func (h *DashboardHandler) GetMekanikDashboard(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// Get mechanic ID from JWT token
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error":   "Unauthorized",
