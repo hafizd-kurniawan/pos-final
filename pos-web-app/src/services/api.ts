@@ -465,7 +465,7 @@ class ApiClient {
   // Customer methods
   public async getCustomers(page: number = 1, limit: number = 20): Promise<PaginatedResponse<Customer>> {
     console.log('👥 GET CUSTOMERS REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<Customer>>>('/customers', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<Customer>>>('/customers/', {
       params: { page, limit }
     });
     
@@ -489,7 +489,7 @@ class ApiClient {
 
   public async createCustomer(data: CreateCustomerRequest): Promise<Customer> {
     console.log('👤 CREATE CUSTOMER REQUEST');
-    const response = await this.client.post<ApiResponse<Customer>>('/customers', data);
+    const response = await this.client.post<ApiResponse<Customer>>('/customers/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -526,7 +526,7 @@ class ApiClient {
     const params: any = { page, limit };
     if (status) params.status = status;
     
-    const response = await this.client.get<ApiResponse<PaginatedResponse<Vehicle>>>('/vehicles', { params });
+    const response = await this.client.get<ApiResponse<PaginatedResponse<Vehicle>>>('/vehicles/', { params });
     
     if (response.data.data) {
       return response.data.data;
@@ -548,7 +548,7 @@ class ApiClient {
 
   public async createVehicle(data: CreateVehicleRequest): Promise<Vehicle> {
     console.log('🚗 CREATE VEHICLE REQUEST');
-    const response = await this.client.post<ApiResponse<Vehicle>>('/vehicles', data);
+    const response = await this.client.post<ApiResponse<Vehicle>>('/vehicles/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -593,7 +593,7 @@ class ApiClient {
   // Sales methods
   public async getSales(page: number = 1, limit: number = 20): Promise<PaginatedResponse<SalesInvoice>> {
     console.log('💰 GET SALES REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<SalesInvoice>>>('/sales', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<SalesInvoice>>>('/sales/', {
       params: { page, limit }
     });
     
@@ -617,7 +617,7 @@ class ApiClient {
 
   public async createSale(data: CreateSalesRequest): Promise<SalesInvoice> {
     console.log('💰 CREATE SALE REQUEST');
-    const response = await this.client.post<ApiResponse<SalesInvoice>>('/sales', data);
+    const response = await this.client.post<ApiResponse<SalesInvoice>>('/sales/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -651,7 +651,7 @@ class ApiClient {
   // Purchase methods
   public async getPurchases(page: number = 1, limit: number = 20): Promise<PaginatedResponse<PurchaseInvoice>> {
     console.log('📦 GET PURCHASES REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<PurchaseInvoice>>>('/purchases', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<PurchaseInvoice>>>('/purchases/', {
       params: { page, limit }
     });
     
@@ -675,7 +675,7 @@ class ApiClient {
 
   public async createPurchase(data: CreatePurchaseRequest): Promise<PurchaseInvoice> {
     console.log('📦 CREATE PURCHASE REQUEST');
-    const response = await this.client.post<ApiResponse<PurchaseInvoice>>('/purchases', data);
+    const response = await this.client.post<ApiResponse<PurchaseInvoice>>('/purchases/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -687,7 +687,7 @@ class ApiClient {
   // Work Order methods
   public async getWorkOrders(page: number = 1, limit: number = 20): Promise<PaginatedResponse<WorkOrder>> {
     console.log('🔧 GET WORK ORDERS REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<WorkOrder>>>('/work-orders', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<WorkOrder>>>('/work-orders/', {
       params: { page, limit }
     });
     
@@ -724,7 +724,7 @@ class ApiClient {
 
   public async createWorkOrder(data: CreateWorkOrderRequest): Promise<WorkOrder> {
     console.log('🔧 CREATE WORK ORDER REQUEST');
-    const response = await this.client.post<ApiResponse<WorkOrder>>('/work-orders', data);
+    const response = await this.client.post<ApiResponse<WorkOrder>>('/work-orders/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -769,7 +769,7 @@ class ApiClient {
   // Spare Parts methods
   public async getSpareParts(page: number = 1, limit: number = 20): Promise<PaginatedResponse<SparePart>> {
     console.log('🔩 GET SPARE PARTS REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<SparePart>>>('/spare-parts', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<SparePart>>>('/spare-parts/', {
       params: { page, limit }
     });
     
@@ -793,7 +793,7 @@ class ApiClient {
 
   public async createSparePart(data: CreateSparePartRequest): Promise<SparePart> {
     console.log('🔩 CREATE SPARE PART REQUEST');
-    const response = await this.client.post<ApiResponse<SparePart>>('/spare-parts', data);
+    const response = await this.client.post<ApiResponse<SparePart>>('/spare-parts/', data);
     
     if (response.data.data) {
       return response.data.data;
@@ -900,7 +900,7 @@ class ApiClient {
   // Notification methods
   public async getNotifications(page: number = 1, limit: number = 20): Promise<PaginatedResponse<Notification>> {
     console.log('🔔 GET NOTIFICATIONS REQUEST');
-    const response = await this.client.get<ApiResponse<PaginatedResponse<Notification>>>('/notifications', {
+    const response = await this.client.get<ApiResponse<PaginatedResponse<Notification>>>('/notifications/', {
       params: { page, limit }
     });
     

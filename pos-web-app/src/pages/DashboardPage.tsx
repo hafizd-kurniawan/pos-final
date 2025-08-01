@@ -97,9 +97,14 @@ const DashboardPage: React.FC = () => {
 
         // Fetch recent sales if user has permission
         if (user?.role === 'admin' || user?.role === 'kasir') {
-          console.log('💰 Getting recent sales...');
-          const salesResponse = await apiClient.getSales(1, 5);
-          setRecentSales(salesResponse.data);
+          try {
+            console.log('💰 Getting recent sales...');
+            const salesResponse = await apiClient.getSales(1, 5);
+            setRecentSales(salesResponse.data || []);
+          } catch (salesError) {
+            console.warn('⚠️ Failed to load recent sales, continuing without them:', salesError);
+            setRecentSales([]);
+          }
         }
 
         console.log('✅ Dashboard data loaded successfully');
@@ -242,7 +247,7 @@ const DashboardPage: React.FC = () => {
               </button>
             </div>
             
-            {recentSales.length > 0 ? (
+            {recentSales && recentSales.length > 0 ? (
               <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900">Recent Sales</h3>
