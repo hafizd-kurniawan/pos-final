@@ -26,7 +26,7 @@ func (r *salesInvoiceRepository) Create(ctx context.Context, invoice *domain.Sal
 			transfer_proof, notes, created_by, transaction_date, profit_amount
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		RETURNING id, created_at, updated_at
+		RETURNING id, created_at
 	`
 	
 	err := r.db.QueryRowContext(ctx, query,
@@ -34,7 +34,7 @@ func (r *salesInvoiceRepository) Create(ctx context.Context, invoice *domain.Sal
 		invoice.SellingPrice, invoice.DiscountPercentage, invoice.DiscountAmount,
 		invoice.FinalPrice, invoice.PaymentMethod, invoice.TransferProof,
 		invoice.Notes, invoice.CreatedBy, invoice.TransactionDate, invoice.ProfitAmount,
-	).Scan(&invoice.ID, &invoice.CreatedAt, &invoice.UpdatedAt)
+	).Scan(&invoice.ID, &invoice.CreatedAt)
 	
 	if err != nil {
 		return fmt.Errorf("failed to create sales invoice: %w", err)
@@ -49,7 +49,7 @@ func (r *salesInvoiceRepository) GetByID(ctx context.Context, id int) (*domain.S
 		SELECT si.id, si.invoice_number, si.customer_id, si.vehicle_id, si.selling_price,
 			   si.discount_percentage, si.discount_amount, si.final_price, si.payment_method,
 			   si.transfer_proof, si.notes, si.created_by, si.transaction_date,
-			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at, si.updated_at,
+			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at,
 			   -- Customer details
 			   c.id as "customer.id", c.customer_code as "customer.customer_code",
 			   c.name as "customer.name", c.phone as "customer.phone",
@@ -101,7 +101,7 @@ func (r *salesInvoiceRepository) List(ctx context.Context, offset, limit int) ([
 		SELECT si.id, si.invoice_number, si.customer_id, si.vehicle_id, si.selling_price,
 			   si.discount_percentage, si.discount_amount, si.final_price, si.payment_method,
 			   si.transfer_proof, si.notes, si.created_by, si.transaction_date,
-			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at, si.updated_at,
+			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at, 
 			   -- Customer details
 			   c.name as "customer.name", c.customer_code as "customer.customer_code",
 			   -- Vehicle details
@@ -155,7 +155,7 @@ func (r *salesInvoiceRepository) ListByCustomer(ctx context.Context, customerID 
 		SELECT si.id, si.invoice_number, si.customer_id, si.vehicle_id, si.selling_price,
 			   si.discount_percentage, si.discount_amount, si.final_price, si.payment_method,
 			   si.transfer_proof, si.notes, si.created_by, si.transaction_date,
-			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at, si.updated_at,
+			   si.profit_amount, si.deleted_at, si.deleted_by, si.created_at, 
 			   -- Vehicle details
 			   v.vehicle_code as "vehicle.vehicle_code", v.brand as "vehicle.brand",
 			   v.model as "vehicle.model", v.status as "vehicle.status"

@@ -97,23 +97,13 @@ func (r *workOrderRepository) GetByWONumber(ctx context.Context, woNumber string
 func (r *workOrderRepository) List(ctx context.Context, offset, limit int) ([]*domain.WorkOrder, error) {
 	var workOrders []*domain.WorkOrder
 	query := `
-		SELECT wo.id, wo.wo_number, wo.vehicle_id, wo.description, wo.assigned_mechanic_id,
-			   wo.status, wo.progress_percentage, wo.total_parts_cost, wo.labor_cost,
-			   wo.total_cost, wo.notes, wo.created_by, wo.started_at, wo.completed_at,
-			   wo.deleted_at, wo.deleted_by, wo.created_at, wo.updated_at,
-			   -- Vehicle details
-			   v.vehicle_code as "vehicle.vehicle_code", v.brand as "vehicle.brand",
-			   v.model as "vehicle.model", v.status as "vehicle.status",
-			   -- Assigned mechanic details
-			   m.username as "assigned_mechanic.username", m.full_name as "assigned_mechanic.full_name",
-			   -- Creator details
-			   c.username as "creator.username", c.full_name as "creator.full_name"
-		FROM work_orders wo
-		LEFT JOIN vehicles v ON wo.vehicle_id = v.id AND v.deleted_at IS NULL
-		LEFT JOIN users m ON wo.assigned_mechanic_id = m.id AND m.deleted_at IS NULL
-		LEFT JOIN users c ON wo.created_by = c.id AND c.deleted_at IS NULL
-		WHERE wo.deleted_at IS NULL
-		ORDER BY wo.created_at DESC
+		SELECT id, wo_number, vehicle_id, description, assigned_mechanic_id,
+			   status, progress_percentage, total_parts_cost, labor_cost,
+			   total_cost, notes, created_by, started_at, completed_at,
+			   deleted_at, deleted_by, created_at, updated_at
+		FROM work_orders 
+		WHERE deleted_at IS NULL
+		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
 	`
 	
@@ -128,23 +118,13 @@ func (r *workOrderRepository) List(ctx context.Context, offset, limit int) ([]*d
 func (r *workOrderRepository) ListByStatus(ctx context.Context, status domain.WorkOrderStatus, offset, limit int) ([]*domain.WorkOrder, error) {
 	var workOrders []*domain.WorkOrder
 	query := `
-		SELECT wo.id, wo.wo_number, wo.vehicle_id, wo.description, wo.assigned_mechanic_id,
-			   wo.status, wo.progress_percentage, wo.total_parts_cost, wo.labor_cost,
-			   wo.total_cost, wo.notes, wo.created_by, wo.started_at, wo.completed_at,
-			   wo.deleted_at, wo.deleted_by, wo.created_at, wo.updated_at,
-			   -- Vehicle details
-			   v.vehicle_code as "vehicle.vehicle_code", v.brand as "vehicle.brand",
-			   v.model as "vehicle.model", v.status as "vehicle.status",
-			   -- Assigned mechanic details
-			   m.username as "assigned_mechanic.username", m.full_name as "assigned_mechanic.full_name",
-			   -- Creator details
-			   c.username as "creator.username", c.full_name as "creator.full_name"
-		FROM work_orders wo
-		LEFT JOIN vehicles v ON wo.vehicle_id = v.id AND v.deleted_at IS NULL
-		LEFT JOIN users m ON wo.assigned_mechanic_id = m.id AND m.deleted_at IS NULL
-		LEFT JOIN users c ON wo.created_by = c.id AND c.deleted_at IS NULL
-		WHERE wo.deleted_at IS NULL AND wo.status = $1
-		ORDER BY wo.created_at DESC
+		SELECT id, wo_number, vehicle_id, description, assigned_mechanic_id,
+			   status, progress_percentage, total_parts_cost, labor_cost,
+			   total_cost, notes, created_by, started_at, completed_at,
+			   deleted_at, deleted_by, created_at, updated_at
+		FROM work_orders 
+		WHERE deleted_at IS NULL AND status = $1
+		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`
 	
@@ -159,17 +139,13 @@ func (r *workOrderRepository) ListByStatus(ctx context.Context, status domain.Wo
 func (r *workOrderRepository) ListByMechanic(ctx context.Context, mechanicID int, offset, limit int) ([]*domain.WorkOrder, error) {
 	var workOrders []*domain.WorkOrder
 	query := `
-		SELECT wo.id, wo.wo_number, wo.vehicle_id, wo.description, wo.assigned_mechanic_id,
-			   wo.status, wo.progress_percentage, wo.total_parts_cost, wo.labor_cost,
-			   wo.total_cost, wo.notes, wo.created_by, wo.started_at, wo.completed_at,
-			   wo.deleted_at, wo.deleted_by, wo.created_at, wo.updated_at,
-			   -- Vehicle details
-			   v.vehicle_code as "vehicle.vehicle_code", v.brand as "vehicle.brand",
-			   v.model as "vehicle.model", v.status as "vehicle.status"
-		FROM work_orders wo
-		LEFT JOIN vehicles v ON wo.vehicle_id = v.id AND v.deleted_at IS NULL
-		WHERE wo.deleted_at IS NULL AND wo.assigned_mechanic_id = $1
-		ORDER BY wo.created_at DESC
+		SELECT id, wo_number, vehicle_id, description, assigned_mechanic_id,
+			   status, progress_percentage, total_parts_cost, labor_cost,
+			   total_cost, notes, created_by, started_at, completed_at,
+			   deleted_at, deleted_by, created_at, updated_at
+		FROM work_orders 
+		WHERE deleted_at IS NULL AND assigned_mechanic_id = $1
+		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`
 	

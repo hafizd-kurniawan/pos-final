@@ -241,7 +241,10 @@ func (pm PaymentMethod) Value() (driver.Value, error) {
 
 // PurchaseInvoice entity
 type PurchaseInvoice struct {
-	BaseModel
+	ID                int              `json:"id" db:"id"`
+	CreatedAt         time.Time        `json:"created_at" db:"created_at"`
+	DeletedAt         *time.Time       `json:"deleted_at" db:"deleted_at"`
+	DeletedBy         *int             `json:"deleted_by" db:"deleted_by"`
 	InvoiceNumber     string           `json:"invoice_number" db:"invoice_number"`
 	TransactionType   TransactionType  `json:"transaction_type" db:"transaction_type"`
 	CustomerID        *int             `json:"customer_id" db:"customer_id"`
@@ -263,7 +266,10 @@ type PurchaseInvoice struct {
 
 // SalesInvoice entity
 type SalesInvoice struct {
-	BaseModel
+	ID                 int           `json:"id" db:"id"`
+	CreatedAt          time.Time     `json:"created_at" db:"created_at"`
+	DeletedAt          *time.Time    `json:"deleted_at" db:"deleted_at"`
+	DeletedBy          *int          `json:"deleted_by" db:"deleted_by"`
 	InvoiceNumber      string        `json:"invoice_number" db:"invoice_number"`
 	CustomerID         int           `json:"customer_id" db:"customer_id"`
 	VehicleID          int           `json:"vehicle_id" db:"vehicle_id"`

@@ -26,7 +26,7 @@ func (r *purchaseInvoiceRepository) Create(ctx context.Context, invoice *domain.
 			transfer_proof, notes, created_by, transaction_date
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		RETURNING id, created_at, updated_at
+		RETURNING id, created_at
 	`
 	
 	err := r.db.QueryRowContext(ctx, query,
@@ -34,7 +34,7 @@ func (r *purchaseInvoiceRepository) Create(ctx context.Context, invoice *domain.
 		invoice.SupplierID, invoice.VehicleID, invoice.PurchasePrice,
 		invoice.NegotiatedPrice, invoice.FinalPrice, invoice.PaymentMethod,
 		invoice.TransferProof, invoice.Notes, invoice.CreatedBy, invoice.TransactionDate,
-	).Scan(&invoice.ID, &invoice.CreatedAt, &invoice.UpdatedAt)
+	).Scan(&invoice.ID, &invoice.CreatedAt)
 	
 	if err != nil {
 		return fmt.Errorf("failed to create purchase invoice: %w", err)
@@ -50,7 +50,7 @@ func (r *purchaseInvoiceRepository) GetByID(ctx context.Context, id int) (*domai
 			   pi.supplier_id, pi.vehicle_id, pi.purchase_price, pi.negotiated_price,
 			   pi.final_price, pi.payment_method, pi.transfer_proof, pi.notes,
 			   pi.created_by, pi.transaction_date, pi.deleted_at, pi.deleted_by,
-			   pi.created_at, pi.updated_at,
+			   pi.created_at, 
 			   -- Customer details
 			   c.id as "customer.id", c.customer_code as "customer.customer_code",
 			   c.name as "customer.name", c.phone as "customer.phone",
@@ -89,7 +89,7 @@ func (r *purchaseInvoiceRepository) GetByInvoiceNumber(ctx context.Context, invo
 			   pi.supplier_id, pi.vehicle_id, pi.purchase_price, pi.negotiated_price,
 			   pi.final_price, pi.payment_method, pi.transfer_proof, pi.notes,
 			   pi.created_by, pi.transaction_date, pi.deleted_at, pi.deleted_by,
-			   pi.created_at, pi.updated_at
+			   pi.created_at, 
 		FROM purchase_invoices pi
 		WHERE pi.invoice_number = $1 AND pi.deleted_at IS NULL
 	`
@@ -105,27 +105,14 @@ func (r *purchaseInvoiceRepository) GetByInvoiceNumber(ctx context.Context, invo
 func (r *purchaseInvoiceRepository) List(ctx context.Context, offset, limit int) ([]*domain.PurchaseInvoice, error) {
 	var invoices []*domain.PurchaseInvoice
 	query := `
-		SELECT pi.id, pi.invoice_number, pi.transaction_type, pi.customer_id,
-			   pi.supplier_id, pi.vehicle_id, pi.purchase_price, pi.negotiated_price,
-			   pi.final_price, pi.payment_method, pi.transfer_proof, pi.notes,
-			   pi.created_by, pi.transaction_date, pi.deleted_at, pi.deleted_by,
-			   pi.created_at, pi.updated_at,
-			   -- Customer details
-			   c.name as "customer.name", c.customer_code as "customer.customer_code",
-			   -- Supplier details  
-			   s.name as "supplier.name", s.supplier_code as "supplier.supplier_code",
-			   -- Vehicle details
-			   v.vehicle_code as "vehicle.vehicle_code", v.brand as "vehicle.brand",
-			   v.model as "vehicle.model", v.status as "vehicle.status",
-			   -- Creator details
-			   u.full_name as "creator.full_name", u.username as "creator.username"
-		FROM purchase_invoices pi
-		LEFT JOIN customers c ON pi.customer_id = c.id AND c.deleted_at IS NULL
-		LEFT JOIN suppliers s ON pi.supplier_id = s.id AND s.deleted_at IS NULL  
-		LEFT JOIN vehicles v ON pi.vehicle_id = v.id AND v.deleted_at IS NULL
-		LEFT JOIN users u ON pi.created_by = u.id AND u.deleted_at IS NULL
-		WHERE pi.deleted_at IS NULL
-		ORDER BY pi.created_at DESC
+		SELECT id, invoice_number, transaction_type, customer_id,
+			   supplier_id, vehicle_id, purchase_price, negotiated_price,
+			   final_price, payment_method, transfer_proof, notes,
+			   created_by, transaction_date, deleted_at, deleted_by,
+			   created_at
+		FROM purchase_invoices
+		WHERE deleted_at IS NULL
+		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
 	`
 	
@@ -144,7 +131,7 @@ func (r *purchaseInvoiceRepository) ListByDateRange(ctx context.Context, startDa
 			   pi.supplier_id, pi.vehicle_id, pi.purchase_price, pi.negotiated_price,
 			   pi.final_price, pi.payment_method, pi.transfer_proof, pi.notes,
 			   pi.created_by, pi.transaction_date, pi.deleted_at, pi.deleted_by,
-			   pi.created_at, pi.updated_at
+			   pi.created_at, 
 		FROM purchase_invoices pi
 		WHERE pi.deleted_at IS NULL 
 		  AND pi.transaction_date >= $1 
@@ -168,7 +155,7 @@ func (r *purchaseInvoiceRepository) ListByTransactionType(ctx context.Context, t
 			   pi.supplier_id, pi.vehicle_id, pi.purchase_price, pi.negotiated_price,
 			   pi.final_price, pi.payment_method, pi.transfer_proof, pi.notes,
 			   pi.created_by, pi.transaction_date, pi.deleted_at, pi.deleted_by,
-			   pi.created_at, pi.updated_at
+			   pi.created_at, 
 		FROM purchase_invoices pi
 		WHERE pi.deleted_at IS NULL AND pi.transaction_type = $1
 		ORDER BY pi.created_at DESC
